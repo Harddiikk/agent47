@@ -1,0 +1,14 @@
+[
+  {"name": "GBP / Google Maps setup + Local SEO",
+   "triggers": ["location", "clinic", "office", "opening", "opened", "branch", "expansion"]},
+  {"name": "Service Landing Page + Google Ads",
+   "triggers": ["machine", "equipment", "laser", "invisalign", "offering", "service launch", "treatment"]},
+  {"name": "Reputation Management",
+   "triggers": ["review", "reviews", "rating", "stars", "complaint", "reputation"]},
+  {"name": "AI Receptionist / Front-desk Automation",
+   "triggers": ["hiring", "front desk", "receptionist", "job", "staff", "recruit"]},
+  {"name": "Booking Automation",
+   "triggers": ["booking", "appointment", "schedule", "scheduling"]},
+  {"name": "Google Ads Management",
+   "triggers": ["ads", "advertising", "campaign", "promotion"]}
+]
