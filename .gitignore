@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+*.egg-info/
+.pytest_cache/
+
+# Orchestrator runtime state
+*.db
+orchestrator/state.db
+workspaces/
