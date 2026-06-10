@@ -36,6 +36,23 @@ Everything runs on an all-Gemini stack via Google ADK, with the four specialist 
   Slack Incoming Webhook, or configure Composio (below). Without either, the pipeline prints
   formatted Slack blocks so it always completes.
 
+### The SDR pipeline (leads → verified signals → offers → Slack cards)
+
+A deeper variant of the scan for your **lead database**: `make sdr-scan` (or
+`make sdr-scan FILE=path/to/leads.csv`).
+
+- Leads CSV schema: `name, domain, linkedin_url, location, services, contact_name,
+  contact_email, last_service, deal_value, status` — only `name` is required, but
+  `domain` powers identity verification.
+- Each lead is **entity-resolved** (does the domain really belong to them?) before any
+  pitching; unresolved leads are flagged, never pitched.
+- Signals are **trust-tiered**: website diffs are ✅ verified (deterministic); grounded
+  search claims are ✅ only when the cited page corroborates them, else ⚠️ probable.
+- Rescans only surface **changes** (delta ledger in `data/sdr.db`, override with
+  `SDR_DB_PATH`); the same signal is never posted twice.
+- Each signal is matched to a service offer (`data/offers.json` — edit it to change
+  what you sell) and delivered as Slack **Block Kit cards** with a digest.
+
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the full flow and [DEVPOST.md](DEVPOST.md) for the
 submission write-up.
 

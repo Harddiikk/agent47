@@ -94,6 +94,29 @@ def scan_my_book() -> dict:
     }
 
 
+def scan_leads(csv_path: str = "data/leads.csv") -> dict:
+    """Run the SDR pipeline over a leads CSV: verify identity, research live,
+    detect what changed, match each signal to a service offer, and post ranked
+    cards to Slack. Use when the founder says "scan my leads", "run the SDR
+    scan", or uploads/mentions a lead list. May take a few minutes.
+
+    Args:
+        csv_path: Path to the leads CSV (default data/leads.csv).
+    """
+    from sdr.pipeline import run_scan
+
+    result = run_scan(csv_path)
+    return {
+        "batch_id": result["batch_id"],
+        "total": result["total"],
+        "resolved": result["resolved"],
+        "unresolved": result["unresolved"],
+        "signals_found": result["signals_found"],
+        "delivery_mode": result["delivery"].get("mode"),
+        "top_3": result["top"][:3],
+    }
+
+
 MANAGER_TOOLS = [
     add_client,
     list_clients,
@@ -101,4 +124,5 @@ MANAGER_TOOLS = [
     list_plans,
     get_plan,
     scan_my_book,
+    scan_leads,
 ]

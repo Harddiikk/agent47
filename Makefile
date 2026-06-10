@@ -25,6 +25,10 @@ test:
 scan:
 	PYTHONPATH=. $(PY) -m scripts.scan
 
+# SDR pipeline: leads CSV → resolve → research → verify → offers → Slack cards
+sdr-scan:
+	PYTHONPATH=. $(PY) -m scripts.sdr_scan $(FILE)
+
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
 	find . -type d -name .pytest_cache -exec rm -rf {} +
