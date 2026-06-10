@@ -2,6 +2,7 @@
 search (reusing shared/research.py) is the ⚠️ tier pending verification."""
 from __future__ import annotations
 
+import re
 from typing import Callable
 
 from sdr.fetch import fetch_text
@@ -11,6 +12,23 @@ from shared.research import research_customer
 PAGES = ("", "/services", "/locations")  # homepage + the two money pages
 _SNAPSHOT_CHARS = 5000
 _EXCERPT_CHARS = 400
+
+# Dynamic-widget noise (store hours, distances, open/closed status) re-renders
+# differently on every fetch and must not count as a website "change".
+_VOLATILE = (
+    re.compile(r"\b\d{1,2}:\d{2}\s*(?:am|pm)?\b", re.IGNORECASE),   # 7:00am
+    re.compile(r"\b\d+(?:\.\d+)?\s*mi\b", re.IGNORECASE),           # 7 mi
+    re.compile(r"\b(?:open|opens|closed|closes)\b", re.IGNORECASE),  # status words
+    re.compile(r"\b(?:mon|monday|tue|tues|tuesday|wed|wednesday|thu|thur|thurs|thursday"
+               r"|fri|friday|sat|saturday|sun|sunday)\b", re.IGNORECASE),
+)
+
+
+def scrub_volatile(text: str) -> str:
+    """Strip dynamic-widget tokens so snapshots only diff on real content."""
+    for pat in _VOLATILE:
+        text = pat.sub(" ", text)
+    return " ".join(text.split())
 
 
 def diff_excerpt(old: str, new: str) -> str:
@@ -34,7 +52,7 @@ def collect_website(lead: dict, store: SdrStore, *,
         if not text:
             continue
         seen += 1
-        snapshot = text[:_SNAPSHOT_CHARS]
+        snapshot = scrub_volatile(text)[:_SNAPSHOT_CHARS]
         field = f"website:{page.strip('/') or 'home'}"
         prior = store.latest_point(lead["id"], field)
         point = store.add_point(lead["id"], field, snapshot, "website", "verified",

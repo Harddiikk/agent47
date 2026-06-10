@@ -39,9 +39,17 @@ def _process_lead(lead: dict, store: SdrStore, fetch, research_fn, offers) -> di
     out["resolved"] = 1
 
     # Deterministic tier: website diffs (✅, free) — emits 'update' signals.
+    # Two noise gates: the excerpt must contain an offer-trigger keyword (a diff
+    # with no sellable hook isn't a pitch), and one update per lead per 30 days.
+    trigger_words = {t for o in offers for t in o.get("triggers", [])}
     site = collect_website(lead, store, fetch=fetch)
     for chg in site["changes"]:
         if not chg["excerpt"]:
+            continue
+        excerpt_lower = chg["excerpt"].lower()
+        if not any(t in excerpt_lower for t in trigger_words):
+            continue
+        if store.has_recent_signal(lead["id"], "update"):
             continue
         summary = f"Website {chg['field'].split(':')[1]} page changed: {chg['excerpt']}"
         sig = store.add_signal(lead["id"], "update", summary, "verified", "medium",
@@ -55,6 +63,9 @@ def _process_lead(lead: dict, store: SdrStore, fetch, research_fn, offers) -> di
     if verdict.get("error"):
         out["errors"] = 1
     if verdict.get("has_signal"):
+        stype = verdict.get("signal_type", "neutral")
+        if store.has_recent_signal(lead["id"], stype):
+            return out  # cooldown: same-type signal already live — rewording can't repost
         tier = verify_grounded(verdict, fetch=fetch)
         if tier in ("verified", "probable"):
             ev = verdict.get("evidence") or []

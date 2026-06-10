@@ -69,3 +69,37 @@ def test_research_error_counted_not_fatal(tmp_path, monkeypatch):
                    draft_fn=lambda c, s: "d")
     assert out["errors"] >= 1
     assert out["signals_found"] == 0
+
+
+def test_reworded_grounded_signal_suppressed_by_cooldown(tmp_path, monkeypatch):
+    monkeypatch.delenv("SLACK_WEBHOOK_URL", raising=False)
+    csv = tmp_path / "leads.csv"
+    csv.write_text(CSV)
+    store = SdrStore(":memory:")
+    v1 = dict(VERDICT)
+    v2 = {**VERDICT, "summary": "Acme Dental keeps growing with another brand-new "
+                                "office launched in Frisco during 2026"}
+    run_scan(csv, store=store, fetch=_fetch,
+             research_fn=lambda n, l="", s="": v1, draft_fn=lambda c, s: "d")
+    second = run_scan(csv, store=store, fetch=_fetch,
+                      research_fn=lambda n, l="", s="": v2, draft_fn=lambda c, s: "d")
+    assert second["signals_found"] == 0          # same type, reworded → cooldown holds
+    assert len(store.list_signals()) == 1
+
+
+def test_website_noise_without_trigger_keyword_not_pitched(tmp_path, monkeypatch):
+    monkeypatch.delenv("SLACK_WEBHOOK_URL", raising=False)
+    csv = tmp_path / "leads.csv"
+    csv.write_text(CSV)
+    store = SdrStore(":memory:")
+    no_sig = {"has_signal": False, "error": ""}
+    pages = {"first": "Acme Dental. We love teeth. Our staff rocks today",
+             "second": "Acme Dental. We love teeth. Our motto changed completely"}
+    state = {"v": "first"}
+    fetchers = lambda url: pages[state["v"]] if "acmedental.com" in url else ""  # noqa: E731
+    run_scan(csv, store=store, fetch=fetchers,
+             research_fn=lambda n, l="", s="": no_sig, draft_fn=lambda c, s: "d")
+    state["v"] = "second"
+    out = run_scan(csv, store=store, fetch=fetchers,
+                   research_fn=lambda n, l="", s="": no_sig, draft_fn=lambda c, s: "d")
+    assert out["signals_found"] == 0     # diff exists but has no offer-trigger keyword

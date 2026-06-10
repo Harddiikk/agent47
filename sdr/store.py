@@ -8,9 +8,11 @@ IS the delta-detection mechanism. signals dedupe on a hash of
 """
 from __future__ import annotations
 
+import functools
 import hashlib
 import sqlite3
-from datetime import datetime, timezone
+import threading
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -28,8 +30,20 @@ def _sig_hash(lead_id: int, signal_type: str, summary: str) -> str:
     return hashlib.sha1(key.encode()).hexdigest()
 
 
+def _synchronized(fn):
+    """Serialize store access: the pipeline's worker threads share one store, and
+    a single ':memory:' sqlite connection is not safe under concurrent use.
+    RLock because add_point() calls latest_point() internally."""
+    @functools.wraps(fn)
+    def wrapper(self, *args, **kwargs):
+        with self._lock:
+            return fn(self, *args, **kwargs)
+    return wrapper
+
+
 class SdrStore:
     def __init__(self, db_path: Path | str):
+        self._lock = threading.RLock()
         self.db_path = str(db_path)
         if self.db_path != ":memory:":
             Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
@@ -95,6 +109,7 @@ class SdrStore:
 
     # --- leads ---
 
+    @_synchronized
     def upsert_lead(self, row: dict) -> dict:
         name = (row.get("name") or "").strip()
         if not name:
@@ -131,6 +146,7 @@ class SdrStore:
                 con.close()
         return self.get_lead(lead_id)  # type: ignore[return-value]
 
+    @_synchronized
     def get_lead(self, lead_id: int) -> Optional[dict]:
         con = self._conn()
         try:
@@ -140,6 +156,7 @@ class SdrStore:
             if self._mem_conn is None:
                 con.close()
 
+    @_synchronized
     def list_leads(self) -> list[dict]:
         con = self._conn()
         try:
@@ -148,6 +165,7 @@ class SdrStore:
             if self._mem_conn is None:
                 con.close()
 
+    @_synchronized
     def set_resolution(self, lead_id: int, resolution: str) -> None:
         con = self._conn()
         try:
@@ -160,6 +178,7 @@ class SdrStore:
 
     # --- data points (delta ledger) ---
 
+    @_synchronized
     def latest_point(self, lead_id: int, field: str) -> Optional[dict]:
         con = self._conn()
         try:
@@ -171,6 +190,7 @@ class SdrStore:
             if self._mem_conn is None:
                 con.close()
 
+    @_synchronized
     def add_point(self, lead_id: int, field: str, value: str, source: str,
                   tier: str, evidence_url: str) -> dict:
         prior = self.latest_point(lead_id, field)
@@ -191,6 +211,7 @@ class SdrStore:
 
     # --- signals ---
 
+    @_synchronized
     def add_signal(self, lead_id: int, signal_type: str, summary: str, tier: str,
                    severity: str, matched_offer: str, score: float) -> Optional[dict]:
         h = _sig_hash(lead_id, signal_type, summary)
@@ -212,6 +233,7 @@ class SdrStore:
             if self._mem_conn is None:
                 con.close()
 
+    @_synchronized
     def list_signals(self, state: Optional[str] = None) -> list[dict]:
         con = self._conn()
         try:
@@ -225,6 +247,24 @@ class SdrStore:
             if self._mem_conn is None:
                 con.close()
 
+    @_synchronized
+    def has_recent_signal(self, lead_id: int, signal_type: str, days: int = 30) -> bool:
+        """Cooldown check: does a non-dismissed signal of this type already exist
+        for this lead within the window? Defeats LLM rewording that slips past
+        the exact summary-hash dedupe."""
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        con = self._conn()
+        try:
+            r = con.execute(
+                "SELECT 1 FROM signals WHERE lead_id = ? AND signal_type = ? "
+                "AND state != 'dismissed' AND created_at >= ? LIMIT 1",
+                (lead_id, signal_type, cutoff)).fetchone()
+            return r is not None
+        finally:
+            if self._mem_conn is None:
+                con.close()
+
+    @_synchronized
     def set_signal_state(self, signal_id: int, state: str) -> None:
         if state not in SIGNAL_STATES:
             raise ValueError(f"invalid state '{state}'")
@@ -238,6 +278,7 @@ class SdrStore:
 
     # --- batches ---
 
+    @_synchronized
     def create_batch(self, csv_path: str, total: int) -> int:
         con = self._conn()
         try:
@@ -249,6 +290,7 @@ class SdrStore:
             if self._mem_conn is None:
                 con.close()
 
+    @_synchronized
     def finish_batch(self, batch_id: int, *, resolved: int = 0,
                      signals_found: int = 0, errors: int = 0) -> None:
         con = self._conn()
@@ -262,6 +304,7 @@ class SdrStore:
             if self._mem_conn is None:
                 con.close()
 
+    @_synchronized
     def get_batch(self, batch_id: int) -> Optional[dict]:
         con = self._conn()
         try:

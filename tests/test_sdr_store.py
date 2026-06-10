@@ -54,3 +54,32 @@ def test_batches():
     s.finish_batch(bid, resolved=8, signals_found=3, errors=1)
     b = s.get_batch(bid)
     assert b["total"] == 10 and b["signals_found"] == 3 and b["finished_at"]
+
+
+def test_has_recent_signal_cooldown():
+    s = SdrStore(":memory:")
+    lead = s.upsert_lead({"name": "X", "domain": "x.com"})
+    assert s.has_recent_signal(lead["id"], "expansion") is False
+    s.add_signal(lead["id"], "expansion", "opened in Frisco", "verified",
+                 "high", "Local SEO", 7.5)
+    assert s.has_recent_signal(lead["id"], "expansion") is True    # same type → cooldown
+    assert s.has_recent_signal(lead["id"], "update") is False      # other type → free
+
+
+def test_store_is_thread_safe():
+    """Concurrent workers hammer one :memory: store — must not raise or lose writes."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    s = SdrStore(":memory:")
+    lead = s.upsert_lead({"name": "X", "domain": "x.com"})
+
+    def work(i: int):
+        s.add_point(lead["id"], f"f{i}", f"v{i}", "website", "verified", "")
+        s.add_signal(lead["id"], "expansion", f"signal {i}", "verified", "low", "o", 1.0)
+        s.latest_point(lead["id"], f"f{i}")
+        s.has_recent_signal(lead["id"], "expansion")
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(work, range(60)))
+
+    assert len(s.list_signals()) == 60
