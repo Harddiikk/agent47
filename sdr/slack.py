@@ -25,6 +25,17 @@ def _post(payload: dict, url: str) -> bool:
         return False
 
 
+def post_progress(text: str) -> bool:
+    """Small live-progress line in the channel while a scan runs (context block).
+    No webhook configured -> quietly False; never raises."""
+    webhook = os.getenv("SLACK_WEBHOOK_URL")
+    if not webhook or not text:
+        return False
+    return _post({"blocks": [{"type": "context",
+                              "elements": [{"type": "mrkdwn", "text": text}]}]},
+                 webhook)
+
+
 def digest_blocks(batch: dict) -> list[dict]:
     """The batch summary that opens every scan post."""
     line = (f"*{batch.get('total', 0)}* leads scanned · "

@@ -28,7 +28,8 @@ def _score(severity: str, confidence: float, tier: str, deal_value: float) -> fl
             + min(float(deal_value or 0) / 10000.0, 1.0))
 
 
-def _process_lead(lead: dict, store: SdrStore, fetch, research_fn, offers) -> dict:
+def _process_lead(lead: dict, store: SdrStore, fetch, research_fn, offers,
+                  progress=None) -> dict:
     """Resolve + enrich one lead. Returns counters + any new signals."""
     out = {"resolved": 0, "unresolved": 0, "errors": 0, "signals": []}
     res = resolve_lead(lead, fetch=fetch)
@@ -82,6 +83,10 @@ def _process_lead(lead: dict, store: SdrStore, fetch, research_fn, offers) -> di
                        tier, lead.get("deal_value", 0)))
             if sig:
                 out["signals"].append({**sig, "evidence_url": ev_url})
+    if progress and out["signals"]:
+        tier_badge = "✅" if out["signals"][0].get("tier") == "verified" else "⚠️"
+        progress(f"🚀 *{lead.get('name', '?')}* — "
+                 f"{out['signals'][0].get('signal_type', '')} signal found {tier_badge}")
     return out
 
 
@@ -90,17 +95,28 @@ def run_scan(csv_path: str | Path, *, store: Optional[SdrStore] = None,
              fetch: Callable[[str], str] = fetch_text,
              research_fn: Callable[..., dict] = research_customer,
              draft_fn: Callable[..., str] = draft_outreach,
-             max_workers: int = 4, deliver: bool = True) -> dict:
+             max_workers: int = 4, deliver: bool = True,
+             progress_fn: Optional[Callable[[str], object]] = None) -> dict:
     """Run one SDR batch. Returns a summary dict; never raises for lead failures."""
+    from sdr.slack import post_progress
+
     store = store or SdrStore(db_path)
     offers = load_offers()
     batch = ingest_csv(store, csv_path)
     leads = batch["leads"]
 
+    # Live progress: the scan announces itself and each find as it happens,
+    # so the founder watches it work instead of staring at a spinner.
+    progress = progress_fn or (post_progress if deliver else None)
+    if progress:
+        progress(f"🔍 *SDR scan #{batch['batch_id']} started* — "
+                 f"{len(leads)} leads · researching live, cards follow…")
+
     counters = {"resolved": 0, "unresolved": 0, "errors": 0}
     new_signals: list[dict] = []
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
-        futures = {pool.submit(_process_lead, lead, store, fetch, research_fn, offers):
+        futures = {pool.submit(_process_lead, lead, store, fetch, research_fn,
+                               offers, progress):
                    lead for lead in leads}
         for fut in as_completed(futures):
             try:
@@ -138,4 +154,10 @@ def run_scan(csv_path: str | Path, *, store: Optional[SdrStore] = None,
                        signals_found=len(new_signals), errors=counters["errors"])
     delivery = (deliver_results(digest_blocks(summary), cards)
                 if deliver else {"mode": "skipped", "delivered": 0})
-    return {**summary, "delivery": delivery, "top": top}
+    if deliver:
+        from sdr.telegram import deliver_digest_telegram
+
+        telegram = deliver_digest_telegram(summary, top)
+    else:
+        telegram = {"mode": "skipped"}
+    return {**summary, "delivery": delivery, "telegram": telegram, "top": top}

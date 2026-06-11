@@ -103,3 +103,16 @@ def test_website_noise_without_trigger_keyword_not_pitched(tmp_path, monkeypatch
     out = run_scan(csv, store=store, fetch=fetchers,
                    research_fn=lambda n, l="", s="": no_sig, draft_fn=lambda c, s: "d")
     assert out["signals_found"] == 0     # diff exists but has no offer-trigger keyword
+
+
+def test_progress_messages_emitted(tmp_path, monkeypatch):
+    monkeypatch.delenv("SLACK_WEBHOOK_URL", raising=False)
+    csv = tmp_path / "leads.csv"
+    csv.write_text(CSV)
+    seen = []
+    run_scan(csv, store=SdrStore(":memory:"), fetch=_fetch,
+             research_fn=lambda n, l="", s="": dict(VERDICT),
+             draft_fn=lambda c, s: "d", deliver=False,
+             progress_fn=lambda msg: seen.append(msg))
+    assert any("scan #" in m and "started" in m for m in seen)   # announce
+    assert any("Acme Dental" in m and "signal found" in m for m in seen)
