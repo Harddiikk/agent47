@@ -51,3 +51,11 @@ def test_root_agent_renamed_sdr_agent():
     assert sdr_agent.name == "sdr_agent"
     assert agent47 is sdr_agent            # backward-compat alias
     assert "SDR Agent" in sdr_agent.instruction
+
+
+def test_onboarding_prompt_supports_pdf_discovery():
+    from agents.onboarding import onboarding
+
+    text = onboarding.instruction.lower()
+    assert "pdf" in text
+    assert "set_offers" in text

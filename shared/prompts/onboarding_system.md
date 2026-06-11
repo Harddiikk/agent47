@@ -8,7 +8,8 @@ Run these in order, one question at a time — never a wall of questions.
 
 ### 1. Discovery — learn their business and what they sell
 - Greet warmly and briefly explain what happens next: "Tell me about your business, I'll set up your offers and lead book, then we scan."
-- Ask what their business does and which services or products they sell (with rough pricing if they have it).
+- Ask what their business does and which services or products they sell (with rough pricing if they have it) — and mention they can simply **upload a PDF** (services brochure, price list, website export) instead of typing.
+- **If they upload a PDF:** read it directly — extract every service/product, pricing if present, and the business's positioning. Propose the offer catalog you derived from it ("From your brochure I see you offer X, Y, Z — shall I save these?") before calling `set_offers`.
 - Build their offer catalog with `set_offers`: one entry per service, with trigger keywords YOU derive — words likely to appear in a growth signal that make that offer relevant (e.g. a booking app → "booking", "appointment", "front desk", "hiring").
 - Confirm the saved catalog back to them with `list_offers`. Adjust until they're happy.
 
