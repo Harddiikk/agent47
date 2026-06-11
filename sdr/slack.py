@@ -9,6 +9,9 @@ import urllib.error
 import urllib.request
 
 _TIER_BADGE = {"verified": "✅ VERIFIED", "probable": "⚠️ PROBABLE"}
+_SEV_EMOJI = {"high": "🔴", "medium": "🟠", "low": "🟢"}
+_DRAFT_CAP = 650  # keep cards scannable; the full draft is one click away in the UI
+_FOOTER = "🕴️ SDR Agent · agent47.tech"
 
 
 def _post(payload: dict, url: str) -> bool:
@@ -28,6 +31,9 @@ def digest_blocks(batch: dict) -> list[dict]:
             f"*{batch.get('resolved', 0)}* resolved · "
             f"*{batch.get('signals_found', 0)}* signals · "
             f"{batch.get('errors', 0)} errors")
+    if batch.get("verified") or batch.get("probable"):
+        line += (f"\n✅ {batch.get('verified', 0)} verified · "
+                 f"⚠️ {batch.get('probable', 0)} probable — ranked cards below 👇")
     blocks = [
         {"type": "header",
          "text": {"type": "plain_text", "text": f"🕴️ SDR Scan #{batch.get('batch_id', '?')}"}},
@@ -56,16 +62,21 @@ def signal_card_blocks(lead: dict, signal: dict, draft: str) -> list[dict]:
                        "text": f"*Evidence:*\n🔗 <{signal['evidence_url']}|source>"})
     if contact:
         fields.append({"type": "mrkdwn", "text": f"*Contact:*\n👤 {contact}"})
+    sev_dot = _SEV_EMOJI.get((signal.get("severity") or "low").lower(), "🟢")
+    draft_text = (draft or "").strip()
+    if len(draft_text) > _DRAFT_CAP:
+        draft_text = draft_text[:_DRAFT_CAP].rstrip() + " …"
     return [
         {"type": "header", "text": {"type": "plain_text",
                                     "text": f"🚀 {lead.get('name', 'Unknown')}"}},
         {"type": "context", "elements": [{
             "type": "mrkdwn",
-            "text": f"{badge} · {sev} · {signal.get('signal_type', '')} · "
+            "text": f"{badge} · {sev_dot} {sev} · {signal.get('signal_type', '')} · "
                     f"score {signal.get('score', 0):.1f}"}]},
         {"type": "section", "fields": fields},
         {"type": "section", "text": {"type": "mrkdwn",
-                                     "text": f"*✉️ Suggested outreach:*\n{draft}"}},
+                                     "text": f"*✉️ Suggested outreach:*\n>{draft_text}"}},
+        {"type": "context", "elements": [{"type": "mrkdwn", "text": _FOOTER}]},
         {"type": "divider"},
     ]
 

@@ -129,8 +129,11 @@ def run_scan(csv_path: str | Path, *, store: Optional[SdrStore] = None,
                     "offer": sig["matched_offer"], "score": sig["score"],
                     "evidence_url": sig.get("evidence_url", ""), "draft": draft})
 
+    tiers = [s["signal"].get("tier") for s in new_signals]
     summary = {"batch_id": batch["batch_id"], "total": len(leads), **counters,
-               "signals_found": len(new_signals)}
+               "signals_found": len(new_signals),
+               "verified": tiers.count("verified"),
+               "probable": tiers.count("probable")}
     store.finish_batch(batch["batch_id"], resolved=counters["resolved"],
                        signals_found=len(new_signals), errors=counters["errors"])
     delivery = (deliver_results(digest_blocks(summary), cards)

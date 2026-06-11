@@ -146,6 +146,46 @@ def import_leads(csv_text: str, replace: bool = False,
             "next_step": "run scan_leads() to research the imported leads"}
 
 
+def set_offers(offers: list) -> dict:
+    """Configure what THIS founder sells, so signals match THEIR services.
+
+    Use whenever a founder/tester describes their products or services (e.g.
+    "we sell web design and a booking app"). Derive trigger keywords yourself:
+    words likely to appear in a growth signal that make the offer relevant
+    (e.g. booking app → ["booking", "appointment", "front desk", "hiring"]).
+    Replaces the whole catalog — include every offer they mention.
+
+    Args:
+        offers: List of {"name": "<service name>", "triggers": ["kw", ...]}.
+    """
+    import json as _json
+    from pathlib import Path as _Path
+
+    cleaned = []
+    for o in offers or []:
+        if not isinstance(o, dict) or not str(o.get("name", "")).strip():
+            continue
+        triggers = [str(t).strip().lower() for t in (o.get("triggers") or [])
+                    if str(t).strip()]
+        cleaned.append({"name": str(o["name"]).strip(), "triggers": triggers})
+    if not cleaned:
+        return {"ok": False,
+                "error": "no valid offers; each needs at least a 'name'"}
+    path = _Path("data/offers.json")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(_json.dumps(cleaned, indent=2))
+    return {"ok": True, "offers_saved": [o["name"] for o in cleaned],
+            "note": "future scans will match signals against these offers"}
+
+
+def list_offers() -> dict:
+    """Show the current offer catalog (what the founder sells) used for
+    signal-to-offer matching."""
+    from sdr.offers import load_offers
+
+    return {"offers": load_offers()}
+
+
 MANAGER_TOOLS = [
     add_client,
     list_clients,
@@ -155,4 +195,6 @@ MANAGER_TOOLS = [
     scan_my_book,
     scan_leads,
     import_leads,
+    set_offers,
+    list_offers,
 ]

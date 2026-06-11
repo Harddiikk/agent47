@@ -44,3 +44,20 @@ def test_deliver_results_posts_each_card(monkeypatch):
                                          "unresolved": 0}), cards)
     assert out["mode"] == "webhook"
     assert len(posted) == 2  # digest + one card
+
+
+def test_digest_shows_tier_breakdown():
+    blocks = digest_blocks({"batch_id": 1, "total": 8, "resolved": 5,
+                            "signals_found": 3, "errors": 0, "unresolved": 3,
+                            "verified": 2, "probable": 1})
+    flat = json.dumps(blocks)
+    assert "2 verified" in flat and "1 probable" in flat
+
+
+def test_card_branding_and_draft_cap():
+    long_draft = "x" * 2000
+    blocks = signal_card_blocks(LEAD, SIGNAL, long_draft)
+    flat = json.dumps(blocks)
+    assert "SDR Agent" in flat                 # branded footer
+    assert "agent47.tech" in flat
+    assert "x" * 700 not in flat               # draft capped
