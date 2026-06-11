@@ -117,6 +117,28 @@ def scan_leads(csv_path: str = "data/leads.csv") -> dict:
     }
 
 
+def import_leads(csv_text: str, replace: bool = False) -> dict:
+    """Save leads the founder pastes into the chat as CSV text, so scan_leads
+    can research them. Use when the founder pastes a lead list or asks to
+    import/add leads. The text must start with a CSV header row that includes
+    'name' (other useful columns: domain, location, services, contact_name,
+    contact_email, last_service, deal_value, status). File uploads (xlsx etc.)
+    are NOT supported — ask the founder to paste rows as text instead.
+
+    Args:
+        csv_text: CSV content, header row first.
+        replace: True to replace the existing lead book instead of appending.
+    """
+    from sdr.ingest import save_leads_text
+
+    try:
+        result = save_leads_text(csv_text, "data/leads.csv", replace=replace)
+    except ValueError as e:
+        return {"ok": False, "error": str(e)}
+    return {"ok": True, **result,
+            "next_step": "run scan_leads() to research the imported leads"}
+
+
 MANAGER_TOOLS = [
     add_client,
     list_clients,
@@ -125,4 +147,5 @@ MANAGER_TOOLS = [
     get_plan,
     scan_my_book,
     scan_leads,
+    import_leads,
 ]
