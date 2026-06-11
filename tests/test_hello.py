@@ -4,7 +4,7 @@ from shared.config import DEFAULT_MODEL
 
 
 def test_agent47_loads():
-    from agents.agent47 import agent47
-    assert agent47.name == "agent47"
+    from agents.sdr_agent import agent47
+    assert agent47.name == "sdr_agent"
     assert agent47.model == DEFAULT_MODEL
     assert "operations agent" in agent47.instruction

@@ -13,7 +13,7 @@ install:
 # PYTHONPATH=. puts the project root on sys.path so ADK can resolve
 # `from agents.onboarding import onboarding` etc. when it loads agents.
 run:
-	PYTHONPATH=. $(ADK) run agents/agent47
+	PYTHONPATH=. $(ADK) run agents/sdr_agent
 
 web:
 	PYTHONPATH=. $(ADK) web agents --port $(PORT)

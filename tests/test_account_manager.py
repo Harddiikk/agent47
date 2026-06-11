@@ -45,7 +45,7 @@ def test_make_client_agent_rejects_empty():
 
 
 def test_agent47_has_both_subagents():
-    from agents.agent47 import agent47
+    from agents.sdr_agent import agent47
 
     names = [a.name for a in agent47.sub_agents]
     assert "onboarding" in names
@@ -53,10 +53,10 @@ def test_agent47_has_both_subagents():
 
 
 def test_part1_and_part2_unbroken():
-    from agents.agent47 import agent47
+    from agents.sdr_agent import agent47
     from agents.onboarding import onboarding
 
-    assert agent47.name == "agent47"
+    assert agent47.name == "sdr_agent"
     assert onboarding.name == "onboarding"
     names = [a.name for a in agent47.sub_agents]
     assert "onboarding" in names

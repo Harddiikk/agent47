@@ -1,4 +1,4 @@
-"""Onboarding Specialist — sub-agent for new client onboarding."""
+"""Onboarding Specialist — takes a new founder from hello to first scan."""
 
 from pathlib import Path
 from google.adk import Agent
@@ -8,12 +8,14 @@ from shared.config import DEFAULT_MODEL
 PROMPT_PATH = Path(__file__).parent.parent.parent / "shared" / "prompts" / "onboarding_system.md"
 SYSTEM_PROMPT = PROMPT_PATH.read_text()
 
+from orchestrator.tools import import_leads, list_offers, set_offers
 from shared.attachment_guard import strip_unsupported_attachments
 
 onboarding = Agent(
     name="onboarding",
     model=DEFAULT_MODEL,
     instruction=SYSTEM_PROMPT,
+    tools=[set_offers, list_offers, import_leads],
     before_model_callback=strip_unsupported_attachments,
 )
 

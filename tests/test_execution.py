@@ -51,18 +51,18 @@ def test_execution_prompt_audit():
 
 
 def test_agent47_has_four_subagents():
-    from agents.agent47 import agent47
+    from agents.sdr_agent import agent47
     names = {a.name for a in agent47.sub_agents}
     assert names == {"onboarding", "account_manager", "intelligence", "execution"}
 
 
 def test_parts_1_through_4_unbroken():
-    from agents.agent47 import agent47
+    from agents.sdr_agent import agent47
     from agents.onboarding import onboarding
     from agents.account_manager import account_manager
     from agents.intelligence import intelligence
     from shared.signals import SAMPLE_SIGNALS
-    assert agent47.name == "agent47"
+    assert agent47.name == "sdr_agent"
     assert len(agent47.sub_agents) == 4
     assert onboarding.name == "onboarding"
     assert account_manager.name == "account_manager"

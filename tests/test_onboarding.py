@@ -27,12 +27,27 @@ def test_onboarding_no_external_comms_clause():
 
 
 def test_agent47_has_onboarding_subagent():
-    from agents.agent47 import agent47
+    from agents.sdr_agent import agent47
 
     assert any(a.name == "onboarding" for a in agent47.sub_agents)
 
 
 def test_root_agent_is_agent47():
-    from agents.agent47 import root_agent, agent47
+    from agents.sdr_agent import root_agent, agent47
 
     assert root_agent is agent47
+
+
+def test_onboarding_has_setup_tools():
+    from agents.onboarding import onboarding
+
+    names = {getattr(t, "__name__", "") for t in onboarding.tools}
+    assert {"set_offers", "list_offers", "import_leads"} <= names
+
+
+def test_root_agent_renamed_sdr_agent():
+    from agents.sdr_agent import agent47, sdr_agent
+
+    assert sdr_agent.name == "sdr_agent"
+    assert agent47 is sdr_agent            # backward-compat alias
+    assert "SDR Agent" in sdr_agent.instruction

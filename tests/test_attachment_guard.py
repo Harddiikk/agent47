@@ -55,7 +55,7 @@ def test_tolerates_empty_and_none():
 
 def test_all_agents_have_guard():
     from agents.account_manager import account_manager, make_client_agent
-    from agents.agent47 import agent47
+    from agents.sdr_agent import agent47
     from agents.execution import execution
     from agents.intelligence import intelligence
     from agents.onboarding import onboarding

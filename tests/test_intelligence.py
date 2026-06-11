@@ -90,7 +90,7 @@ def test_intelligence_tools_reject_bad_args():
 
 
 def test_agent47_has_three_subagents():
-    from agents.agent47 import agent47
+    from agents.sdr_agent import agent47
 
     names = {a.name for a in agent47.sub_agents}
     assert names == {"onboarding", "account_manager", "intelligence", "execution"}
@@ -189,7 +189,7 @@ def test_add_signal_and_reset():
 
 def test_part1_2_3_unbroken():
     from agents.account_manager import account_manager, make_client_agent
-    from agents.agent47 import agent47
+    from agents.sdr_agent import agent47
     from agents.onboarding import onboarding  # noqa: F401
 
     assert {a.name for a in agent47.sub_agents} >= {"onboarding", "account_manager"}
