@@ -123,15 +123,23 @@ def scan_leads(csv_path: str = "data/leads.csv") -> dict:
                              "Excel/CSV file in the chat or paste leads as "
                              "text, then scan."}
     result = run_scan(path)
-    return {
+    out = {
         "batch_id": result["batch_id"],
         "total": result["total"],
         "resolved": result["resolved"],
         "unresolved": result["unresolved"],
         "signals_found": result["signals_found"],
+        "already_tracked": result.get("already_tracked", 0),
         "delivery_mode": result["delivery"].get("mode"),
         "top_3": result["top"][:3],
     }
+    if out["signals_found"] == 0 and out["already_tracked"] > 0:
+        out["note"] = (
+            "0 NEW signals is normal on a rescan: every previously found signal "
+            "is still on file (the system never reposts duplicates). Tell the "
+            "founder this clearly, then use get_all_signals to show the "
+            f"{out['already_tracked']} active signal(s) they can act on.")
+    return out
 
 
 def import_leads(csv_text: str, replace: bool = False,

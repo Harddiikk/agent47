@@ -45,6 +45,10 @@ def digest_blocks(batch: dict) -> list[dict]:
     if batch.get("verified") or batch.get("probable"):
         line += (f"\n✅ {batch.get('verified', 0)} verified · "
                  f"⚠️ {batch.get('probable', 0)} probable — ranked cards below 👇")
+    elif not batch.get("signals_found") and batch.get("already_tracked"):
+        line += (f"\n✔️ Nothing NEW since the last scan — "
+                 f"{batch['already_tracked']} previously found signal(s) still "
+                 f"on file and current.")
     blocks = [
         {"type": "header",
          "text": {"type": "plain_text", "text": f"🕴️ SDR Scan #{batch.get('batch_id', '?')}"}},

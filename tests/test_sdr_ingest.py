@@ -132,3 +132,19 @@ def test_save_leads_text_unmappable_lists_headers(tmp_path):
     with _pytest.raises(ValueError) as e:
         save_leads_text("foo,bar\n1,2\n", tmp_path / "l.csv")
     assert "foo" in str(e.value) and "column_map" in str(e.value)
+
+
+def test_underscore_and_hyphen_headers_map(tmp_path):
+    """Regression: 'company_name' and 'full_name' (underscores) failed to map
+    and the agent told the founder to rename their spreadsheet columns."""
+    from sdr.ingest import save_leads_text
+    csv_text = ("company_name,full_name,Email,Company-Website,deal_value\n"
+                "Smile Dental,Raj Patel,raj@smile.com,smiledental.com,\"$5,000\"\n")
+    out = save_leads_text(csv_text, tmp_path / "l.csv")
+    assert out["imported"] == 1
+    row = load_leads(tmp_path / "l.csv")[0]
+    assert row["name"] == "Smile Dental"
+    assert row["contact_name"] == "Raj Patel"
+    assert row["contact_email"] == "raj@smile.com"
+    assert row["domain"] == "smiledental.com"
+    assert row["deal_value"] == 5000.0

@@ -61,3 +61,12 @@ def test_card_branding_and_draft_cap():
     assert "SDR Agent" in flat                 # branded footer
     assert "agent47.tech" in flat
     assert "x" * 700 not in flat               # draft capped
+
+
+def test_digest_explains_zero_new_signals():
+    blocks = digest_blocks({"batch_id": 9, "total": 28, "resolved": 20,
+                            "signals_found": 0, "errors": 0, "unresolved": 8,
+                            "already_tracked": 12})
+    flat = json.dumps(blocks)
+    assert "Nothing NEW" in flat
+    assert "12 previously found" in flat

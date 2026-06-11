@@ -146,8 +146,12 @@ def run_scan(csv_path: str | Path, *, store: Optional[SdrStore] = None,
                     "evidence_url": sig.get("evidence_url", ""), "draft": draft})
 
     tiers = [s["signal"].get("tier") for s in new_signals]
+    # "0 new signals" on a rescan is the dedupe working, not a failure. Surface
+    # how many previously found signals are still on file so reports read true.
+    already_tracked = max(len(store.list_signals()) - len(new_signals), 0)
     summary = {"batch_id": batch["batch_id"], "total": len(leads), **counters,
                "signals_found": len(new_signals),
+               "already_tracked": already_tracked,
                "verified": tiers.count("verified"),
                "probable": tiers.count("probable")}
     store.finish_batch(batch["batch_id"], resolved=counters["resolved"],

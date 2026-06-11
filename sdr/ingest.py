@@ -52,8 +52,8 @@ _HEADER_ALIASES = {
                  "city/state", "town"),
     "services": ("services", "industry", "category", "niche", "specialty",
                  "vertical", "type", "services offered"),
-    "contact_email": ("contact_email", "email", "e-mail", "email address",
-                      "work email", "mail"),
+    "contact_email": ("contact_email", "contact email", "email", "e-mail",
+                      "email address", "work email", "mail", "lead email"),
     "last_service": ("last_service", "last service", "previous service",
                      "service bought", "past service"),
     "deal_value": ("deal_value", "deal value", "value", "revenue", "amount",
@@ -64,21 +64,31 @@ _FIRST_NAME = ("first name", "first_name", "firstname", "first")
 _LAST_NAME = ("last name", "last_name", "lastname", "last", "surname")
 
 
+def _norm_header(h: str) -> str:
+    """Lowercase and treat underscores/hyphens as spaces, so company_name,
+    Company-Name and 'Company Name' are all the same header."""
+    return " ".join(str(h or "").strip().lower()
+                    .replace("_", " ").replace("-", " ").split())
+
+
 def _build_header_map(fieldnames: list[str], column_map: dict | None) -> dict:
     """Map each raw header -> canonical field ('' = ignore). Explicit
     column_map (the agent's own intelligence) wins over the alias table."""
-    explicit = {str(k).strip().lower(): str(v).strip().lower()
+    explicit = {_norm_header(k): str(v).strip().lower()
                 for k, v in (column_map or {}).items()}
-    alias_lookup = {a: canon for canon, aliases in _HEADER_ALIASES.items()
+    alias_lookup = {_norm_header(a): canon
+                    for canon, aliases in _HEADER_ALIASES.items()
                     for a in aliases}
+    first = {_norm_header(a) for a in _FIRST_NAME}
+    last = {_norm_header(a) for a in _LAST_NAME}
     mapping: dict[str, str] = {}
     for raw in fieldnames or []:
-        key = (raw or "").strip().lower()
+        key = _norm_header(raw)
         if key in explicit and explicit[key] in LEAD_FIELDS:
             mapping[raw] = explicit[key]
-        elif key in _FIRST_NAME:
+        elif key in first:
             mapping[raw] = "_first"
-        elif key in _LAST_NAME:
+        elif key in last:
             mapping[raw] = "_last"
         else:
             mapping[raw] = alias_lookup.get(key, "")

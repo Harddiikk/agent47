@@ -116,3 +116,19 @@ def test_progress_messages_emitted(tmp_path, monkeypatch):
              progress_fn=lambda msg: seen.append(msg))
     assert any("scan #" in m and "started" in m for m in seen)   # announce
     assert any("Acme Dental" in m and "signal found" in m for m in seen)
+
+
+def test_rescan_reports_already_tracked(tmp_path, monkeypatch):
+    """'0 new signals' must come with the count of signals still on file."""
+    monkeypatch.delenv("SLACK_WEBHOOK_URL", raising=False)
+    csv = tmp_path / "leads.csv"
+    csv.write_text(CSV)
+    store = SdrStore(":memory:")
+    kwargs = dict(store=store, fetch=_fetch,
+                  research_fn=lambda n, l="", s="": dict(VERDICT),
+                  draft_fn=lambda c, s: "d")
+    first = run_scan(csv, **kwargs)
+    assert first["signals_found"] == 1
+    second = run_scan(csv, **kwargs)
+    assert second["signals_found"] == 0
+    assert second["already_tracked"] == 1
