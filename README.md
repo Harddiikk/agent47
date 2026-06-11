@@ -1,10 +1,14 @@
-# 🕴️ Agent 47
+# 🕴️ Agent 47 — SDR Agent
 
 **An AI operations agent that turns your past customers and dormant leads into warm pipeline.**
 
-Built for the **Google for Startups AI Agents Challenge** · Domain: [agent47.tech](https://agent47.tech)
+Built for the **Google for Startups AI Agents Challenge** · Live at [agent47.tech](https://agent47.tech)
 
-Agent 47 researches every business in your book **live on the web** (Gemini + Google Search grounding), verifies what it finds, detects what *changed* since the last scan, matches each signal to a service you actually sell, drafts the outreach, and delivers ranked opportunity cards to Slack.
+<p align="center">
+  <img src="assets/pipeline-animated.svg" alt="How a scan works: leads → identity verification → live web research → verified signals → offer match → Slack cards" width="100%"/>
+</p>
+
+Drop your lead list into the chat (Excel works — no exporting, no formatting), tell the agent what you sell, and say *"scan my leads."* It researches every business **live on the web** (Gemini + Google Search grounding), verifies what it finds, detects what *changed* since the last scan, matches each signal to a service you actually sell, drafts the outreach, and streams its progress into Slack as it works — finishing with ranked opportunity cards.
 
 > Live run on 8 real medspa/dental businesses: surfaced verified signals like *"SkinSpirit opened its 60th location in Princeton, NJ"* and *"Heartland Dental acquired Smile Design Dentistry (+60 offices)"* — each with a clickable source, a matched service offer, and a ready-to-send email.
 
@@ -113,15 +117,26 @@ make install
 | `make run` | Chat with Agent 47 in the terminal |
 | `make scan` | Headless Pipeline 1: customers → research → drafts → Slack |
 | `make sdr-scan` | Headless Pipeline 2: leads → verify → delta → offers → Block Kit cards |
-| `make test` | Full offline test suite (146 tests, no API calls) |
+| `make test` | Full offline test suite (179 tests, no API calls) |
+
+### Built for everyone, not just developers
+
+- **Drop your Excel/CSV file straight into the chat** — headers from any CRM are mapped
+  automatically (Company→name, Website→domain, First/Last name→contact). No exporting,
+  no pasting, no formats to learn.
+- **Tell the agent what you sell in plain words** — it builds your offer catalog itself.
+- **Watch it work:** scans stream live progress into Slack
+  (`🔍 scan started… 🚀 SkinSpirit — signal found ✅ … 📊 done`) instead of a silent spinner.
+- **Digest on your phone:** optional Telegram delivery, set up in 2 minutes via @BotFather.
 
 ### Environment variables
 
 | Variable | Required | Purpose |
 |---|---|---|
 | `GEMINI_API_KEY` | ✅ | All research + drafting (Gemini 2.5 Flash) |
-| `SLACK_WEBHOOK_URL` | recommended | Real Slack delivery (Block Kit). Without it, pipelines still complete and print formatted output |
+| `SLACK_WEBHOOK_URL` | recommended | Real Slack delivery (Block Kit cards + live progress). Without it, pipelines still complete and print formatted output |
 | `SLACK_CHANNEL` | optional | Label for delivery reports (default `#general`) |
+| `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | optional | Scan digests on your phone (@BotFather token + @userinfobot chat id) |
 | `COMPOSIO_API_KEY` / `COMPOSIO_USER_ID` | optional | Execution agent's real tools (Gmail / Calendar / Slack / 500+ apps via MCP) |
 | `GEMINI_MODEL`, `SDR_DB_PATH`, `MOU_DB_PATH` | optional | Overrides |
 

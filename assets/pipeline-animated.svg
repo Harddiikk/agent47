@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 250" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <!-- Agent 47 / SDR Agent — animated pipeline. SMIL animations play on GitHub when embedded as an <img>. -->
+  <rect width="1080" height="250" rx="14" fill="#0b1422"/>
+  <text x="540" y="34" text-anchor="middle" fill="#38bdf8" font-size="15" font-weight="700" letter-spacing="3">SDR AGENT · HOW A SCAN WORKS</text>
+
+  <!-- connector line with flowing dashes -->
+  <line x1="100" y1="125" x2="980" y2="125" stroke="#122036" stroke-width="6"/>
+  <line x1="100" y1="125" x2="980" y2="125" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 10" opacity="0.7">
+    <animate attributeName="stroke-dashoffset" from="32" to="0" dur="0.9s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- traveling pulse -->
+  <circle r="7" fill="#38bdf8">
+    <animateMotion path="M 100 125 L 980 125" dur="7.2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.6;1" dur="1s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="13" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.5">
+    <animateMotion path="M 100 125 L 980 125" dur="7.2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- STAGE 1: leads -->
+  <g>
+    <rect x="30" y="85" width="140" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="30" y="85" width="140" height="80" rx="12" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.12;0.2" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="100" y="115" text-anchor="middle" font-size="22">📄</text>
+    <text x="100" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Your leads</text>
+    <text x="100" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">Excel / CSV / chat</text>
+  </g>
+
+  <!-- STAGE 2: identity gate -->
+  <g>
+    <rect x="210" y="85" width="150" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="210" y="85" width="150" height="80" rx="12" fill="none" stroke="#f87171" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.28;0.36" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="285" y="115" text-anchor="middle" font-size="22">🔒</text>
+    <text x="285" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Verify identity</text>
+    <text x="285" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">wrong business = never pitched</text>
+  </g>
+
+  <!-- STAGE 3: live research -->
+  <g>
+    <rect x="400" y="85" width="150" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="400" y="85" width="150" height="80" rx="12" fill="none" stroke="#34d399" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.36;0.46;0.54" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="475" y="115" text-anchor="middle" font-size="22">🌐</text>
+    <text x="475" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Live web research</text>
+    <text x="475" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">Gemini + Google Search</text>
+  </g>
+
+  <!-- STAGE 4: verified signals -->
+  <g>
+    <rect x="590" y="85" width="150" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="590" y="85" width="150" height="80" rx="12" fill="none" stroke="#34d399" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.54;0.62;0.7" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="665" y="115" text-anchor="middle" font-size="22">✅</text>
+    <text x="665" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Verified signals</text>
+    <text x="665" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">real sources, fresh only</text>
+  </g>
+
+  <!-- STAGE 5: offer match -->
+  <g>
+    <rect x="780" y="85" width="130" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="780" y="85" width="130" height="80" rx="12" fill="none" stroke="#fbbf24" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.7;0.78;0.86" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="845" y="115" text-anchor="middle" font-size="22">💰</text>
+    <text x="845" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Offer match</text>
+    <text x="845" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">your services</text>
+  </g>
+
+  <!-- STAGE 6: slack -->
+  <g>
+    <rect x="950" y="85" width="110" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="950" y="85" width="110" height="80" rx="12" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.86;0.95;1" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="1005" y="115" text-anchor="middle" font-size="22">💬</text>
+    <text x="1005" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Slack cards</text>
+    <text x="1005" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">draft + send</text>
+  </g>
+
+  <!-- footer: live progress hint, blinking -->
+  <text x="540" y="215" text-anchor="middle" fill="#7d93b2" font-size="12">
+    🔍 scan #9 started · 8 leads
+    <animate attributeName="opacity" values="1;1;0;0;0;0" keyTimes="0;0.3;0.35;0.65;0.7;1" dur="7.2s" repeatCount="indefinite"/>
+  </text>
+  <text x="540" y="215" text-anchor="middle" fill="#34d399" font-size="12" opacity="0">
+    🚀 SkinSpirit — expansion signal found ✅
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.35;0.4;0.65;0.7;1" dur="7.2s" repeatCount="indefinite"/>
+  </text>
+  <text x="540" y="215" text-anchor="middle" fill="#fbbf24" font-size="12" opacity="0">
+    📊 done: 2 verified signals · cards delivered to Slack
+    <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.7;0.75;1" dur="7.2s" repeatCount="indefinite"/>
+  </text>
+</svg>
