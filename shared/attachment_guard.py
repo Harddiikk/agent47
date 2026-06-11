@@ -87,9 +87,9 @@ def _import_note(name: str, result) -> str:
         note = f" Note: {result['note']}." if result.get("note") else ""
         return (f"[Spreadsheet '{name}' received: {result['imported']} leads "
                 f"imported into the lead book ({result['total_in_file']} total)."
-                f"{note} Confirm this to the founder, mention any leads missing "
-                f"a website domain can't be verified, and offer to run "
-                f"scan_leads.]")
+                f"{note} Tell the founder the counts in one line, then START THE "
+                f"SCAN IMMEDIATELY (route to research / scan_leads) — dropping a "
+                f"lead file means scan; do not ask for permission or more details.]")
     return (f"[Spreadsheet '{name}' could not be imported: "
             f"{result.get('error', 'unknown error')}. Tell the founder what "
             f"went wrong in plain language and how to fix it.]")

@@ -124,13 +124,21 @@ class SdrStore:
             if existing is None:
                 cols = {f: (row.get(f) or ("" if f != "deal_value" else 0)) for f in LEAD_FIELDS}
                 cols["name"], cols["domain"] = name, domain
-                con.execute(
-                    f"INSERT INTO leads ({', '.join(LEAD_FIELDS)}, created_at, updated_at) "
-                    f"VALUES ({', '.join('?' * len(LEAD_FIELDS))}, ?, ?)",
-                    [*[cols[f] for f in LEAD_FIELDS], now, now],
-                )
-                lead_id = con.execute("SELECT last_insert_rowid() AS i").fetchone()["i"]
-            else:
+                try:
+                    con.execute(
+                        f"INSERT INTO leads ({', '.join(LEAD_FIELDS)}, created_at, updated_at) "
+                        f"VALUES ({', '.join('?' * len(LEAD_FIELDS))}, ?, ?)",
+                        [*[cols[f] for f in LEAD_FIELDS], now, now],
+                    )
+                    lead_id = con.execute("SELECT last_insert_rowid() AS i").fetchone()["i"]
+                except sqlite3.IntegrityError:
+                    # Lost a check-then-insert race with a concurrent request
+                    # (the in-process lock can't cover two store instances on
+                    # the same file). The row exists now — fall through to it.
+                    existing = con.execute(
+                        "SELECT id FROM leads WHERE name = ? AND domain = ?",
+                        (name, domain)).fetchone()
+            if existing is not None:
                 lead_id = existing["id"]
                 updates = {f: row[f] for f in LEAD_FIELDS
                            if row.get(f) not in (None, "", 0)}

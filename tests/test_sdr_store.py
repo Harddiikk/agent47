@@ -83,3 +83,21 @@ def test_store_is_thread_safe():
         list(pool.map(work, range(60)))
 
     assert len(s.list_signals()) == 60
+
+
+def test_upsert_lead_survives_cross_instance_race(tmp_path):
+    """Two store instances (two requests) upserting the same lead concurrently
+    must never raise IntegrityError and must end with exactly one row."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    db = tmp_path / "race.db"
+    a, b = SdrStore(db), SdrStore(db)   # separate instances = separate locks
+
+    def hammer(store):
+        for _ in range(40):
+            store.upsert_lead({"name": "Milan Laser", "domain": "milanlaser.com"})
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        list(pool.map(hammer, [a, b]))   # raises if IntegrityError escapes
+
+    assert len(SdrStore(db).list_leads()) == 1
