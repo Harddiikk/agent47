@@ -89,5 +89,21 @@ def test_reupload_same_rows_different_file_reports_not_failure(tmp_path, monkeyp
     from shared.attachment_guard import _import_note
     note = _import_note("leads.csv", again)
     assert "NOT a failure" in note
-    assert "scan_leads" in note
+    assert "get_all_signals" in note          # show existing signals, no pointless rescan
     assert "re-paste" in note or "re-upload" in note
+
+
+def test_import_note_targets_new_leads_only(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    try_import_blob(_xlsx_bytes(CRM_ROWS), XLSX_MIME, "first.xlsx")
+    # second file adds ONE new lead alongside one duplicate
+    new_rows = [CRM_ROWS[0],
+                CRM_ROWS[1],
+                ["Zoe", "Park", "FreshClinic", "freshclinic.com", "z@fresh.com", "Denver"]]
+    out = try_import_blob(_xlsx_bytes(new_rows), XLSX_MIME, "second.xlsx")
+    assert out["imported"] == 1
+    assert out["imported_names"] == ["FreshClinic"]
+    from shared.attachment_guard import _import_note
+    note = _import_note("second.xlsx", out)
+    assert 'names="FreshClinic"' in note
+    assert "ONLY the new leads" in note

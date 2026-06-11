@@ -92,16 +92,23 @@ def _import_note(name: str, result) -> str:
                     f"every lead in it is ALREADY in the lead book "
                     f"({result.get('duplicates_skipped', 0)} duplicates skipped, "
                     f"{result['total_in_file']} leads on file). Do NOT ask the "
-                    f"founder to re-paste or re-upload anything. Say the leads "
-                    f"are already loaded, then START THE SCAN IMMEDIATELY by "
-                    f"calling scan_leads with NO arguments.]")
+                    f"founder to re-paste or re-upload anything, and do NOT "
+                    f"rescan the whole book. Say the leads are already loaded, "
+                    f"show the active signals with get_all_signals, and offer a "
+                    f"fresh rescan only if the founder wants one.]")
+        new_names = [n for n in result.get("imported_names", []) if n][:15]
+        if new_names and result["imported"] <= 15:
+            scan_instr = (f"calling scan_leads with names="
+                          f"\"{', '.join(new_names)}\" so ONLY the new leads are "
+                          f"researched (do not re-crawl the whole book)")
+        else:
+            scan_instr = "calling scan_leads with NO arguments"
         return (f"[Spreadsheet '{name}' received: {result['imported']} new leads "
                 f"imported into the lead book ({result['total_in_file']} total, "
                 f"{result.get('duplicates_skipped', 0)} duplicates skipped)."
                 f"{note} Tell the founder the counts in one line, then START THE "
-                f"SCAN IMMEDIATELY by calling scan_leads with NO arguments (the "
-                f"file is already merged into the lead book; never pass the "
-                f"uploaded filename as a path). Do not ask for permission.]")
+                f"SCAN IMMEDIATELY by {scan_instr}. Never pass the uploaded "
+                f"filename as a path. Do not ask for permission.]")
     return (f"[Spreadsheet '{name}' could not be imported: "
             f"{result.get('error', 'unknown error')}. Tell the founder what "
             f"went wrong in plain language and how to fix it.]")

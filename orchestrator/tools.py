@@ -94,19 +94,22 @@ def scan_my_book() -> dict:
     }
 
 
-def scan_leads(csv_path: str = "data/leads.csv") -> dict:
-    """Run the SDR pipeline over the lead book: verify identity, research live,
-    detect what changed, match each signal to a service offer, and post ranked
-    cards to Slack. Use when the founder says "scan my leads", "run the SDR
-    scan", or a lead file was just imported. May take a few minutes.
+def scan_leads(csv_path: str = "data/leads.csv", names: str = "") -> dict:
+    """Run the SDR pipeline: verify identity, research live, detect what
+    changed, match each signal to a service offer, and post ranked cards to
+    Slack. Use when the founder says "scan my leads", "run the SDR scan", or a
+    lead file was just imported. May take a few minutes.
 
-    ALWAYS call this with NO arguments. Uploaded files are merged into the
-    default lead book automatically; never build a path from an uploaded
-    filename.
+    Scope: when an import note lists newly added leads, pass them via `names`
+    so ONLY those are researched (faster, cheaper, no re-crawling the book).
+    Same when the founder names specific leads ("scan Acme and GlowSpa").
+    For a full-book scan ("scan my leads", first scan) leave names empty.
+    Never build csv_path from an uploaded filename.
 
     Args:
-        csv_path: Leave at the default. Only set when the founder explicitly
-            names a different CSV path that exists on the server.
+        csv_path: Leave at the default lead book.
+        names: Optional comma-separated lead names to scan only those
+            (case-insensitive, partial names fine).
     """
     from pathlib import Path
 
@@ -122,7 +125,8 @@ def scan_leads(csv_path: str = "data/leads.csv") -> dict:
                     "error": "no lead book yet. Ask the founder to drop their "
                              "Excel/CSV file in the chat or paste leads as "
                              "text, then scan."}
-    result = run_scan(path)
+    only = [n for n in (names or "").split(",") if n.strip()] or None
+    result = run_scan(path, only_names=only)
     out = {
         "batch_id": result["batch_id"],
         "total": result["total"],

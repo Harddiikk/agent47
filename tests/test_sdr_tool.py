@@ -74,3 +74,20 @@ def test_scan_leads_clean_error_when_no_book(tmp_path, monkeypatch):
     out = scan_leads("data/nothing.csv")
     assert out["ok"] is False
     assert "drop" in out["error"].lower()
+
+
+def test_scan_leads_passes_names_filter(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "data").mkdir()
+    (tmp_path / "data" / "leads.csv").write_text("name,domain\nAcme,acme.com\n")
+    import sdr.pipeline as pl
+    seen = {}
+    monkeypatch.setattr(pl, "run_scan", lambda path, only_names=None, **kw:
+                        seen.update(names=only_names) or {
+        "batch_id": 1, "total": 1, "resolved": 1, "unresolved": 0,
+        "signals_found": 0, "already_tracked": 0,
+        "delivery": {"mode": "skipped"}, "top": []})
+    from orchestrator.tools import scan_leads
+
+    scan_leads(names="Acme, GlowSpa")
+    assert seen["names"] == ["Acme", " GlowSpa"] or seen["names"] == ["Acme", "GlowSpa"]

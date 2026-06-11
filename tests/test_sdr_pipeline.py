@@ -132,3 +132,21 @@ def test_rescan_reports_already_tracked(tmp_path, monkeypatch):
     second = run_scan(csv, **kwargs)
     assert second["signals_found"] == 0
     assert second["already_tracked"] == 1
+
+
+def test_only_names_limits_the_scan(tmp_path, monkeypatch):
+    """Uploading 2 leads must not re-crawl the whole book."""
+    monkeypatch.delenv("SLACK_WEBHOOK_URL", raising=False)
+    csv = tmp_path / "leads.csv"
+    csv.write_text("name,domain\nAcme Dental,acmedental.com\nOther Co,other.com\n")
+    calls = []
+
+    def counting_research(n, l="", s=""):
+        calls.append(n)
+        return {"has_signal": False, "error": ""}
+
+    out = run_scan(csv, store=SdrStore(":memory:"), fetch=_fetch,
+                   research_fn=counting_research, draft_fn=lambda c, s: "d",
+                   only_names=["acme dental"])
+    assert out["total"] == 1          # only the named lead in the batch
+    assert calls == ["Acme Dental"]   # the other lead was never researched

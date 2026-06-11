@@ -96,14 +96,24 @@ def run_scan(csv_path: str | Path, *, store: Optional[SdrStore] = None,
              research_fn: Callable[..., dict] = research_customer,
              draft_fn: Callable[..., str] = draft_outreach,
              max_workers: int = 4, deliver: bool = True,
-             progress_fn: Optional[Callable[[str], object]] = None) -> dict:
-    """Run one SDR batch. Returns a summary dict; never raises for lead failures."""
+             progress_fn: Optional[Callable[[str], object]] = None,
+             only_names: Optional[list[str]] = None) -> dict:
+    """Run one SDR batch. Returns a summary dict; never raises for lead failures.
+
+    only_names limits the scan to matching leads (case-insensitive, exact or
+    substring) — e.g. just-imported leads, instead of re-crawling the book.
+    """
     from sdr.slack import post_progress
 
     store = store or SdrStore(db_path)
     offers = load_offers()
     batch = ingest_csv(store, csv_path)
     leads = batch["leads"]
+    if only_names:
+        needles = [n.strip().lower() for n in only_names if n and n.strip()]
+        leads = [l for l in leads
+                 if any(n == l["name"].lower() or n in l["name"].lower()
+                        for n in needles)]
 
     # Live progress: the scan announces itself and each find as it happens,
     # so the founder watches it work instead of staring at a spinner.

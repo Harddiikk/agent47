@@ -167,6 +167,7 @@ def save_leads_text(csv_text: str, path: str | Path, *, replace: bool = False,
             writer.writerow({f: r.get(f, "") for f in LEAD_FIELDS})
     return {"imported": len(rows), "total_in_file": len(existing) + len(rows),
             "duplicates_skipped": duplicates_skipped,
+            "imported_names": [r["name"] for r in rows][:50],
             "path": str(p), "replaced": replace,
             "note": ("no business-name column found; used the contact's person "
                      "name as the lead name" if used_person_as_name else "")}
