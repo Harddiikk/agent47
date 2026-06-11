@@ -1,13 +1,15 @@
-"""SDR Agent — the root orchestrator the founder talks to (brand: Agent 47)."""
+"""SDR Agent — the single agent the founder talks to. Does everything itself.
+
+Multi-agent transfers were tried and reverted: prompt-swapping on every handoff
+broke context caching (latency) and made the founder experience bureaucratic.
+One agent, all tools, act-first. The specialist apps still exist standalone
+(onboarding, research, etc.) for direct use in the dev UI.
+"""
 
 from pathlib import Path
 from google.adk import Agent
-from agents.onboarding import onboarding
-from agents.account_manager import account_manager
-from agents.intelligence import intelligence
-from agents.execution import execution
-from agents.research import research
-from orchestrator.tools import COORDINATOR_TOOLS
+from agents.intelligence.agent import INTELLIGENCE_TOOLS
+from orchestrator.tools import MANAGER_TOOLS
 from shared.attachment_guard import strip_unsupported_attachments
 from shared.config import DEFAULT_MODEL
 
@@ -15,14 +17,11 @@ from shared.config import DEFAULT_MODEL
 PROMPT_PATH = Path(__file__).parent.parent.parent / "shared" / "prompts" / "sdr_agent_system.md"
 SYSTEM_PROMPT = PROMPT_PATH.read_text()
 
-# Pure coordinator: routes to specialists, keeps only work-dispatch tools.
-# Each specialist owns its lane exclusively (see the routing table in the prompt).
 sdr_agent = Agent(
     name="sdr_agent",
     model=DEFAULT_MODEL,
     instruction=SYSTEM_PROMPT,
-    sub_agents=[onboarding, account_manager, intelligence, execution, research],
-    tools=COORDINATOR_TOOLS,
+    tools=[*MANAGER_TOOLS, *INTELLIGENCE_TOOLS],
     before_model_callback=strip_unsupported_attachments,
 )
 

@@ -120,8 +120,9 @@ def test_intelligence_tools_empty_ledger_is_honest(tmp_path, monkeypatch):
 def test_agent47_has_three_subagents():
     from agents.sdr_agent import agent47
 
-    names = {a.name for a in agent47.sub_agents}
-    assert names == {"onboarding", "account_manager", "intelligence", "execution", "research"}
+    assert not agent47.sub_agents  # single agent: no routing
+    names = {getattr(t, "__name__", "") for t in agent47.tools}
+    assert "scan_leads" in names and "get_all_signals" in names
 
 
 # --- Signal model tests ---
@@ -220,5 +221,5 @@ def test_part1_2_3_unbroken():
     from agents.sdr_agent import agent47
     from agents.onboarding import onboarding  # noqa: F401
 
-    assert {a.name for a in agent47.sub_agents} >= {"onboarding", "account_manager"}
+    assert {getattr(t, "__name__", "") for t in agent47.tools} >= {"add_client", "import_leads"}
     assert make_client_agent("Acme", "x").name == "account_manager_acme"

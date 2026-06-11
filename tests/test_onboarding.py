@@ -29,7 +29,9 @@ def test_onboarding_no_external_comms_clause():
 def test_agent47_has_onboarding_subagent():
     from agents.sdr_agent import agent47
 
-    assert any(a.name == "onboarding" for a in agent47.sub_agents)
+    # single-agent design: root owns onboarding tools directly
+    names = {getattr(t, "__name__", "") for t in agent47.tools}
+    assert {"set_offers", "import_leads"} <= names
 
 
 def test_root_agent_is_agent47():

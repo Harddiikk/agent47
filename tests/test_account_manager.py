@@ -47,9 +47,9 @@ def test_make_client_agent_rejects_empty():
 def test_agent47_has_both_subagents():
     from agents.sdr_agent import agent47
 
-    names = [a.name for a in agent47.sub_agents]
-    assert "onboarding" in names
-    assert "account_manager" in names
+    assert not agent47.sub_agents
+    names = {getattr(t, "__name__", "") for t in agent47.tools}
+    assert {"add_client", "list_clients"} <= names
 
 
 def test_part1_and_part2_unbroken():
@@ -58,8 +58,7 @@ def test_part1_and_part2_unbroken():
 
     assert agent47.name == "sdr_agent"
     assert onboarding.name == "onboarding"
-    names = [a.name for a in agent47.sub_agents]
-    assert "onboarding" in names
+    assert not agent47.sub_agents
 
 
 def test_account_manager_has_client_tools():
