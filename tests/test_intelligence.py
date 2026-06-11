@@ -93,7 +93,7 @@ def test_agent47_has_three_subagents():
     from agents.sdr_agent import agent47
 
     names = {a.name for a in agent47.sub_agents}
-    assert names == {"onboarding", "account_manager", "intelligence", "execution"}
+    assert names == {"onboarding", "account_manager", "intelligence", "execution", "research"}
 
 
 # --- Signal model tests ---

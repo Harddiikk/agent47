@@ -186,6 +186,7 @@ def list_offers() -> dict:
     return {"offers": load_offers()}
 
 
+# Full registry of manager tools (kept for tests/back-compat and ad-hoc use).
 MANAGER_TOOLS = [
     add_client,
     list_clients,
@@ -198,3 +199,11 @@ MANAGER_TOOLS = [
     set_offers,
     list_offers,
 ]
+
+# Role separation: each agent gets only its lane.
+#   coordinator (root)  -> work dispatch only; everything else is routed
+#   research            -> the scan pipelines
+#   onboarding          -> offers + lead import (defined in its module)
+#   account_manager     -> client records (defined in its module)
+COORDINATOR_TOOLS = [dispatch_plan, list_plans, get_plan]
+RESEARCH_TOOLS = [scan_leads, scan_my_book]
