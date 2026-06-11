@@ -1,81 +1,171 @@
-# Agent 47
+# 🕴️ Agent 47
 
-AI operations agent for AI automation agencies. Built for the Google for Startups AI Agents Challenge.
+**An AI operations agent that turns your past customers and dormant leads into warm pipeline.**
 
-Domain: [agent47.tech](https://agent47.tech)
+Built for the **Google for Startups AI Agents Challenge** · Domain: [agent47.tech](https://agent47.tech)
 
-## What it does
+Agent 47 researches every business in your book **live on the web** (Gemini + Google Search grounding), verifies what it finds, detects what *changed* since the last scan, matches each signal to a service you actually sell, drafts the outreach, and delivers ranked opportunity cards to Slack.
 
-Agent 47 turns a list of your **past customers** into warm pipeline. Tell it "scan my book"
-and it will, for every customer:
+> Live run on 8 real medspa/dental businesses: surfaced verified signals like *"SkinSpirit opened its 60th location in Princeton, NJ"* and *"Heartland Dental acquired Smile Design Dentistry (+60 offices)"* — each with a clickable source, a matched service offer, and a ready-to-send email.
 
-1. **Research them live on the web** (Gemini + Google Search grounding) for real, recent
-   growth signals — new locations, senior hires, funding, press.
-2. **Rank** the hits by severity and confidence, with **verifiable source links**.
-3. **Draft a personalized outreach** email referencing the specific signal.
-4. **Post the opportunities to Slack** for you to action.
+---
 
-Everything runs on an all-Gemini stack via Google ADK, with the four specialist sub-agents
-(Onboarding, Account Manager, Intelligence, Execution) behind a single agent you talk to.
+## Why this matters (the business case)
 
-## Quick start
-1. `python3 -m venv .venv && source .venv/bin/activate`
-2. `cp .env.example .env` and add your `GEMINI_API_KEY` from https://aistudio.google.com/apikey
-3. `make install`
-4. `make scan` — **headless demo:** scan `data/customers.csv` → research → draft → Slack/print
-5. `make web` — chat with Agent 47 in the ADK web UI; say *"scan my book"*
-6. `make run` — chat with Agent 47 in the terminal
-7. `make test` — run the test suite (101 tests)
+Agencies sit on a goldmine they ignore: **past customers and closed-lost leads**. A former client who just opened their 100th location or raised funding is the warmest lead you can get — but nobody manually Googles every old account every week. The signal is public; the labor isn't worth it. Agent 47 automates exactly that unscalable part:
 
-### The "scan my book" pipeline
-- Customers live in `data/customers.csv` (`name, location, services, contact_email`).
-- Live research uses Google Search **grounding** — source URLs come from the model's
-  grounding metadata, not free text, so they're real.
-- Found signals persist to `data/book.db` (SQLite).
-- **Slack delivery** (optional, for a real post on camera): set `SLACK_WEBHOOK_URL` to a
-  Slack Incoming Webhook, or configure Composio (below). Without either, the pipeline prints
-  formatted Slack blocks so it always completes.
+```
+existing database → live research → verified change → matched offer → outreach → Slack
+```
 
-### The SDR pipeline (leads → verified signals → offers → Slack cards)
+Re-engaging existing contacts costs $0 in acquisition and converts 2–5× better than cold outreach.
 
-A deeper variant of the scan for your **lead database**: `make sdr-scan` (or
-`make sdr-scan FILE=path/to/leads.csv`).
-
-- Leads CSV schema: `name, domain, linkedin_url, location, services, contact_name,
-  contact_email, last_service, deal_value, status` — only `name` is required, but
-  `domain` powers identity verification.
-- Each lead is **entity-resolved** (does the domain really belong to them?) before any
-  pitching; unresolved leads are flagged, never pitched.
-- Signals are **trust-tiered**: website diffs are ✅ verified (deterministic); grounded
-  search claims are ✅ only when the cited page corroborates them, else ⚠️ probable.
-- Rescans only surface **changes** (delta ledger in `data/sdr.db`, override with
-  `SDR_DB_PATH`); the same signal is never posted twice.
-- Each signal is matched to a service offer (`data/offers.json` — edit it to change
-  what you sell) and delivered as Slack **Block Kit cards** with a digest.
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full flow and [DEVPOST.md](DEVPOST.md) for the
-submission write-up.
-
-## Stack
-- Google ADK 2.0 (Python)
-- Gemini 2.5 Flash / Pro / Live
-- MCP for tool access (via Composio Tool Router)
+---
 
 ## Architecture
-Agent 47 is the root agent the founder talks to. It delegates to four specialists:
-- **Onboarding** — discovery, scoping, kickoff for new clients
-- **Account Manager** — ongoing client work, status tracking, issue triage
-- **Intelligence** — signal monitoring across the client book, weekly briefs
-- **Execution** — drafts and (with founder approval) sends comms via Gmail / Calendar / Slack / 500+ apps through Composio
 
-## Composio setup (optional, for Execution)
+### The agent system (Google ADK 2.0)
 
-The Execution sub-agent uses Composio's hosted MCP Tool Router for Gmail, Calendar, Slack, and 500+ other apps. Without it, Execution drafts only and asks you to send manually.
+```mermaid
+flowchart TD
+    F(["👤 Founder<br/>(ADK web UI / terminal)"]) --> A47["🕴️ Agent 47<br/>root orchestrator"]
+    A47 --> ON["📋 Onboarding<br/>discovery · scoping · kickoff"]
+    A47 --> AM["🤝 Account Manager<br/>ongoing client work"]
+    A47 --> IN["🧠 Intelligence<br/>signal monitoring + weekly briefs"]
+    A47 --> EX["⚡ Execution<br/>Gmail / Calendar / Slack via Composio MCP<br/>(approval-gated)"]
+    A47 -.->|manager tools| T["add_client · dispatch_plan · list_plans<br/>scan_my_book · scan_leads"]
 
-1. Sign up at https://dashboard.composio.dev and grab your API key from Settings → API Keys.
-2. Add to `.env`:
-   ```
-   COMPOSIO_API_KEY=...
-   COMPOSIO_USER_ID=your-email@example.com   # any stable identifier
-   ```
-3. Restart `make web`. Execution will now have tools attached. The first time you ask it to act, Composio will ask you to authorize each app via OAuth (one-time per app).
+    style A47 fill:#1a2740,stroke:#38bdf8,color:#dde8f5
+    style T fill:#14233a,stroke:#34d399,color:#dde8f5
+```
+
+One root agent the founder talks to; four specialists it delegates to; a set of manager tools that run the two research pipelines.
+
+### Pipeline 1 — `scan_my_book` (past customers → outreach)
+
+```mermaid
+flowchart LR
+    CSV["data/customers.csv"] --> R["🌐 Grounded research<br/>Gemini 2.5 Flash +<br/>Google Search"]
+    R --> RANK["Rank by<br/>severity × confidence"]
+    RANK --> D["✍️ Personalized<br/>outreach drafts"]
+    D --> S["💬 Slack"]
+    R -.->|real citations from<br/>grounding_metadata| R
+
+    style R fill:#14233a,stroke:#34d399,color:#dde8f5
+```
+
+### Pipeline 2 — `scan_leads` (the SDR engine: verified, delta-aware, offer-matched)
+
+```mermaid
+flowchart TD
+    CSV["📄 leads.csv<br/>name · domain · linkedin · contact · deal_value"] --> ING["Ingest + batch"]
+    ING --> ER{"🔒 Entity resolution<br/>does the domain really<br/>belong to this lead?"}
+    ER -->|unresolved| FLAG["Flagged in digest<br/>NEVER pitched"]
+    ER -->|verified / weak| COLL["Collectors (trust-tiered)"]
+    COLL --> WD["✅ Website snapshot + diff<br/>(deterministic)"]
+    COLL --> GR["⚠️ Grounded web research<br/>(Gemini + Search)"]
+    GR --> VER{"Verification<br/>evidence URL fetched ·<br/>claim corroborated ·<br/>≤12-month recency"}
+    VER -->|corroborated| V1["✅ verified"]
+    VER -->|fetchable only| V2["⚠️ probable"]
+    VER -->|stale / unfetchable| X["🗑 discarded"]
+    WD --> DELTA["Δ Delta ledger (SQLite)<br/>only NEW changes ·<br/>30-day per-type cooldown ·<br/>never repost"]
+    V1 --> DELTA
+    V2 --> DELTA
+    DELTA --> OFF["💰 Offer matching<br/>data/offers.json"]
+    OFF --> CARD["📇 Slack Block Kit cards<br/>digest + ranked signals + drafts"]
+
+    style ER fill:#3a1a1a,stroke:#f87171,color:#dde8f5
+    style DELTA fill:#1a2740,stroke:#38bdf8,color:#dde8f5
+    style CARD fill:#14233a,stroke:#fbbf24,color:#dde8f5
+```
+
+**The three correctness guarantees** (each one exists because we caught the failure live):
+
+| Guarantee | Mechanism | The failure it prevents |
+|---|---|---|
+| Right business | Entity-resolution gate (domain ⇄ name/location match) | Pitching based on a same-named stranger's news |
+| Real, fresh facts | Trust tiers: deterministic diff > corroborated grounding > probable; recency check | Congratulating someone on stale or hallucinated news |
+| Never repeats | Delta ledger + summary-hash dedupe + per-(lead, type) 30-day cooldown; volatile-widget scrubbing | Spamming the same signal, or "signals" from a store-hours widget re-rendering |
+
+### Signal → Offer matching
+
+| Signal detected | Matched service (configurable in `data/offers.json`) |
+|---|---|
+| New location / clinic opened | GBP / Google Maps setup + Local SEO |
+| New machine / service launched | Service landing page + Google Ads |
+| Reviews / rating falling | Reputation management |
+| Hiring front-desk / admin staff | AI receptionist / front-desk automation |
+| No online booking detected | Booking automation |
+
+---
+
+## Quick start
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+cp .env.example .env        # add GEMINI_API_KEY (aistudio.google.com/apikey)
+make install
+```
+
+| Command | What it does |
+|---|---|
+| `make web` | ADK web UI at `:8001` — chat with Agent 47 (*"scan my book"*, *"scan my leads"*) |
+| `make run` | Chat with Agent 47 in the terminal |
+| `make scan` | Headless Pipeline 1: customers → research → drafts → Slack |
+| `make sdr-scan` | Headless Pipeline 2: leads → verify → delta → offers → Block Kit cards |
+| `make test` | Full offline test suite (146 tests, no API calls) |
+
+### Environment variables
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `GEMINI_API_KEY` | ✅ | All research + drafting (Gemini 2.5 Flash) |
+| `SLACK_WEBHOOK_URL` | recommended | Real Slack delivery (Block Kit). Without it, pipelines still complete and print formatted output |
+| `SLACK_CHANNEL` | optional | Label for delivery reports (default `#general`) |
+| `COMPOSIO_API_KEY` / `COMPOSIO_USER_ID` | optional | Execution agent's real tools (Gmail / Calendar / Slack / 500+ apps via MCP) |
+| `GEMINI_MODEL`, `SDR_DB_PATH`, `MOU_DB_PATH` | optional | Overrides |
+
+---
+
+## Project structure
+
+```
+agents/            # ADK agents: agent47 (root) + onboarding, account_manager,
+                   #   intelligence (signal tools), execution (Composio MCP)
+orchestrator/      # manager layer: SQLite store, tool-free Gemini planner,
+                   #   dispatcher, Gemini-CLI build worker, MANAGER_TOOLS
+sdr/               # the SDR engine: store (delta ledger) · ingest · resolve ·
+                   #   collect (diff + grounded) · verify · offers · pipeline · slack
+shared/            # research.py (Google Search grounding), outreach.py,
+                   #   signals.py, config.py, prompts/*.md
+scripts/           # headless runners: scan.py, sdr_scan.py
+data/              # customers.csv, leads.csv, offers.json (+ gitignored SQLite)
+tests/             # 146 offline tests (fakes/fixtures, zero API calls)
+docs/superpowers/  # design specs + implementation plans
+```
+
+## How the research stays honest
+
+- **Citations are real:** source URLs come from Gemini's `grounding_metadata` (the actual Google Search results used), never from model free-text.
+- **Search grounding can't be combined with JSON mode**, so the model emits a JSON block that's parsed tolerantly and then enriched with the grounded URLs.
+- **Everything degrades gracefully:** every collector/verifier returns data or an error field — a throttled API call (free-tier 503s are common) becomes a counted error, never a crash; Slack falls back webhook → formatted text; a batch always finishes and always reports.
+
+## Testing
+
+```bash
+make test                                   # 146 tests, all offline
+RUN_GEMINI_SMOKE=1 .venv/bin/pytest -q      # + opt-in live API smoke
+```
+
+Tests use injected fakes for every external surface (Gemini client, page fetcher, Slack poster) — including a thread-safety hammer test on the shared SQLite store and end-to-end pipeline tests proving the dedupe/cooldown behavior.
+
+## Docs
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) — pipeline internals + design decisions
+- [DEVPOST.md](DEVPOST.md) — hackathon submission write-up (problem, solution, rubric)
+- [docs/superpowers/specs/](docs/superpowers/specs/) — the SDR agent design spec
+- [docs/superpowers/plans/](docs/superpowers/plans/) — the TDD implementation plan it was built from
+
+## Stack
+
+Google ADK 2.0 · Gemini 2.5 Flash · Google Search grounding (`google-genai`) · Composio MCP Tool Router · SQLite (stdlib) · Slack Block Kit · Python 3.12 · pytest
