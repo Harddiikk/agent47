@@ -47,3 +47,12 @@ def test_research_has_attachment_guard():
     cbs = cb if isinstance(cb, list) else [cb]
     assert any(getattr(c, "__name__", "") == "strip_unsupported_attachments"
                for c in cbs)
+
+
+def test_root_greeting_leads_with_core_job_not_departments():
+    from agents.sdr_agent import sdr_agent
+
+    text = sdr_agent.instruction.lower()
+    assert "never greet with a menu" in text or "never list departments" in text
+    assert "past customers" in text
+    assert "scan my leads" in text
