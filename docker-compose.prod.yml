@@ -1,0 +1,29 @@
+# Agent 47 on the auto4u VPS — follows the house pattern:
+# Docker + external `proxy` network + Caddy domain block (no host ports).
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Caddy block (in /opt/caddy/Caddyfile):
+#   agent47.auto4u.in {
+#       basic_auth { agent47 <bcrypt-hash> }
+#       reverse_proxy agent47-web:8001
+#   }
+services:
+  agent47-web:
+    build: .
+    image: agent47-web:latest
+    container_name: agent47-web
+    env_file: .env
+    restart: unless-stopped
+    mem_limit: 512m            # the box is RAM-tight; hard cap
+    volumes:
+      - agent47-data:/app/data # persists sdr.db / book.db across deploys
+    networks:
+      - proxy
+
+volumes:
+  agent47-data:
+
+networks:
+  proxy:
+    external: true             # shared bridge Caddy uses to reach apps
