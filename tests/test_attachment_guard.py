@@ -15,17 +15,48 @@ def _content(*parts):
     return types.Content(role="user", parts=list(parts))
 
 
-def test_xlsx_blob_replaced_with_guidance():
+def _xlsx_bytes(rows):
+    import io
+
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    for r in rows:
+        ws.append(r)
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def test_xlsx_blob_is_imported_as_leads(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    data = _xlsx_bytes([["Company", "Website"], ["Acme Dental", "acme.com"]])
     req = _Req([_content(
         types.Part(text="here is my customer file"),
-        types.Part(inline_data=types.Blob(mime_type=XLSX, data=b"PK", display_name="leads.xlsx")),
+        types.Part(inline_data=types.Blob(mime_type=XLSX, data=data,
+                                          display_name="leads.xlsx")),
     )])
     assert strip_unsupported_attachments(None, req) is None  # continue request
     parts = req.contents[0].parts
-    assert parts[1].inline_data is None          # blob gone
-    assert "leads.xlsx" in parts[1].text         # helpful placeholder
-    assert "CSV" in parts[1].text
+    assert parts[1].inline_data is None              # blob gone
+    assert "leads.xlsx" in parts[1].text
+    assert "1 leads imported" in parts[1].text       # actually imported
     assert parts[0].text == "here is my customer file"  # untouched
+    from sdr.ingest import load_leads
+    assert load_leads("data/leads.csv")[0]["name"] == "Acme Dental"
+
+
+def test_corrupt_xlsx_reports_error_not_crash(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    req = _Req([_content(
+        types.Part(inline_data=types.Blob(mime_type=XLSX, data=b"PK",
+                                          display_name="bad.xlsx")),
+    )])
+    strip_unsupported_attachments(None, req)
+    txt = req.contents[0].parts[0].text
+    assert "could not be imported" in txt
+    assert "bad.xlsx" in txt
 
 
 def test_supported_attachments_kept():
@@ -37,8 +68,9 @@ def test_supported_attachments_kept():
     assert req.contents[0].parts[1].inline_data is not None
 
 
-def test_history_blobs_also_stripped():
+def test_history_blobs_also_stripped(tmp_path, monkeypatch):
     # Poisoned-session case: blob deep in history, not the latest turn.
+    monkeypatch.chdir(tmp_path)
     req = _Req([
         _content(types.Part(inline_data=types.Blob(mime_type=XLSX, data=b"PK"))),
         _content(types.Part(text="retry")),

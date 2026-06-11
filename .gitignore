@@ -10,3 +10,4 @@ __pycache__/
 *.db
 orchestrator/state.db
 workspaces/
+data/.imported_files.json

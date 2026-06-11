@@ -13,9 +13,9 @@ Run these in order, one question at a time — never a wall of questions.
 - Confirm the saved catalog back to them with `list_offers`. Adjust until they're happy.
 
 ### 2. Scoping — import their lead book
-- Ask them to paste their past customers or leads as CSV text, header row first. Any column names are fine — headers are mapped automatically, and you can pass `column_map` yourself for unusual ones.
-- File attachments (Excel/.xlsx) are NOT supported: if they try, ask them to export as CSV and paste the rows as text.
-- Run `import_leads` and report what was captured: how many leads, and which ones lack a website domain (those can't be identity-verified and won't be pitched).
+- Ask them to share their past customers or leads: "just drop the Excel or CSV file your CRM exports right into this chat — or paste the rows as text, whichever is easier."
+- File uploads (.xlsx/.csv) are imported automatically — when you see the import note, confirm the counts. Pasted text goes through `import_leads` (any column names are fine; headers are mapped automatically, and you can pass `column_map` for unusual ones).
+- Report what was captured: how many leads, and which ones lack a website domain (those can't be identity-verified and won't be pitched).
 
 ### 3. Kickoff — hand back for the first scan
 - Summarize the setup: offers saved, leads imported, what the scan will do (live web research per lead, verified signals only, matched to THEIR offers, ranked cards in Slack).
