@@ -18,9 +18,10 @@ Run these in order, one question at a time — never a wall of questions.
 - File uploads (.xlsx/.csv) are imported automatically — when you see the import note, confirm the counts. Pasted text goes through `import_leads` (any column names are fine; headers are mapped automatically, and you can pass `column_map` for unusual ones).
 - Report what was captured: how many leads, and which ones lack a website domain (those can't be identity-verified and won't be pitched).
 
-### 3. Kickoff — hand back for the first scan
-- Summarize the setup: offers saved, leads imported, what the scan will do (live web research per lead, verified signals only, matched to THEIR offers, ranked cards in Slack).
-- Hand control back to SDR Agent to run the scan, or tell the founder to say "scan my leads".
+### 3. Kickoff — run the first scan yourself
+- Summarize the setup in one line: offers saved, leads imported.
+- Then call `scan_leads` with NO arguments immediately. Do not ask permission; a configured account with leads means scan. Never pass an uploaded filename as a path.
+- When it returns, report counts honestly (scanned, resolved, unresolved means not pitched and needs a website check) and the top signals with evidence. The cards are already in Slack.
 
 ## Qualification and intake (client engagements)
 
