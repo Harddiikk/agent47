@@ -88,8 +88,9 @@ def _import_note(name: str, result) -> str:
         return (f"[Spreadsheet '{name}' received: {result['imported']} leads "
                 f"imported into the lead book ({result['total_in_file']} total)."
                 f"{note} Tell the founder the counts in one line, then START THE "
-                f"SCAN IMMEDIATELY (route to research / scan_leads) — dropping a "
-                f"lead file means scan; do not ask for permission or more details.]")
+                f"SCAN IMMEDIATELY by calling scan_leads with NO arguments (the "
+                f"file is already merged into the lead book; never pass the "
+                f"uploaded filename as a path). Do not ask for permission.]")
     return (f"[Spreadsheet '{name}' could not be imported: "
             f"{result.get('error', 'unknown error')}. Tell the founder what "
             f"went wrong in plain language and how to fix it.]")

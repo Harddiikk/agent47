@@ -46,3 +46,31 @@ def test_set_offers_rejects_empty(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     from orchestrator.tools import set_offers
     assert set_offers([])["ok"] is False
+
+
+def test_scan_leads_falls_back_when_model_invents_path(tmp_path, monkeypatch):
+    """Regression: the model built a path from an uploaded filename
+    (data/ScrapData....csv) and FileNotFoundError crashed the scan."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "data").mkdir()
+    (tmp_path / "data" / "leads.csv").write_text("name,domain\nAcme,acme.com\n")
+
+    import sdr.pipeline as pl
+    seen = {}
+    monkeypatch.setattr(pl, "run_scan", lambda path, **kw: seen.update(p=str(path)) or {
+        "batch_id": 1, "total": 1, "resolved": 1, "unresolved": 0,
+        "signals_found": 0, "delivery": {"mode": "skipped"}, "top": []})
+    from orchestrator.tools import scan_leads
+
+    out = scan_leads("data/ScrapData_OD-32_08.12.2025.csv")
+    assert seen["p"] == "data/leads.csv"      # fell back to the real book
+    assert out["total"] == 1
+
+
+def test_scan_leads_clean_error_when_no_book(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    from orchestrator.tools import scan_leads
+
+    out = scan_leads("data/nothing.csv")
+    assert out["ok"] is False
+    assert "drop" in out["error"].lower()

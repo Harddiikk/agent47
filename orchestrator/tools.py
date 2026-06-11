@@ -95,17 +95,34 @@ def scan_my_book() -> dict:
 
 
 def scan_leads(csv_path: str = "data/leads.csv") -> dict:
-    """Run the SDR pipeline over a leads CSV: verify identity, research live,
+    """Run the SDR pipeline over the lead book: verify identity, research live,
     detect what changed, match each signal to a service offer, and post ranked
     cards to Slack. Use when the founder says "scan my leads", "run the SDR
-    scan", or uploads/mentions a lead list. May take a few minutes.
+    scan", or a lead file was just imported. May take a few minutes.
+
+    ALWAYS call this with NO arguments. Uploaded files are merged into the
+    default lead book automatically; never build a path from an uploaded
+    filename.
 
     Args:
-        csv_path: Path to the leads CSV (default data/leads.csv).
+        csv_path: Leave at the default. Only set when the founder explicitly
+            names a different CSV path that exists on the server.
     """
+    from pathlib import Path
+
     from sdr.pipeline import run_scan
 
-    result = run_scan(csv_path)
+    default = "data/leads.csv"
+    path = csv_path or default
+    if not Path(path).exists():
+        if Path(default).exists():
+            path = default  # an invented/guessed path falls back to the book
+        else:
+            return {"ok": False,
+                    "error": "no lead book yet. Ask the founder to drop their "
+                             "Excel/CSV file in the chat or paste leads as "
+                             "text, then scan."}
+    result = run_scan(path)
     return {
         "batch_id": result["batch_id"],
         "total": result["total"],
