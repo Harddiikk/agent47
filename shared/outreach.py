@@ -23,8 +23,10 @@ them scale operations with AI automation.
 Customer: {name}
 Growth signal: {summary}
 Reference this concretely. Be specific, not generic. No subject line. NEVER use bracketed \
-placeholders like [Name] or [Your Agency Name] — use the real business name, and sign off \
-exactly as "— The Agent 47 team". Plain text. End with a soft call to action to reconnect."""
+placeholders like [Name] or [Your Agency Name]; use the real business name. Sign off with \
+"The Agent 47 team" on its own line. Plain text. Never use em dashes or double hyphens. \
+Write like a busy founder typing a quick note, not like marketing copy. \
+End with a soft call to action to reconnect."""
 
 
 def _is_transient(err: str) -> bool:

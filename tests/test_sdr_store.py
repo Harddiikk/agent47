@@ -101,3 +101,27 @@ def test_upsert_lead_survives_cross_instance_race(tmp_path):
         list(pool.map(hammer, [a, b]))   # raises if IntegrityError escapes
 
     assert len(SdrStore(db).list_leads()) == 1
+
+
+def test_upsert_never_rewrites_identity_or_collides(tmp_path):
+    """Regression: raw-cased domains written back by updates created near-dupe
+    rows whose later updates hit the UNIQUE constraint (prod IntegrityError)."""
+    db = tmp_path / "dirty.db"
+    s = SdrStore(db)
+    clean = s.upsert_lead({"name": "Acme Dental", "domain": "acme.com"})
+    # simulate legacy dirty row from the old behavior (trailing space in name)
+    con = s._conn()
+    con.execute(
+        "INSERT INTO leads (name, domain, linkedin_url, location, services, "
+        "contact_name, contact_email, last_service, deal_value, status, "
+        "created_at, updated_at) VALUES ('Acme Dental ', 'acme.com', '', '', "
+        "'', '', '', '', 0, '', 'x', 'x')")
+    con.commit()
+    con.close()
+    # this upsert used to rewrite name to the raw 'Acme Dental ' and collide
+    out = s.upsert_lead({"name": "Acme Dental", "domain": "ACME.com",
+                         "location": "Austin"})
+    assert out["id"] == clean["id"]
+    assert out["name"] == "Acme Dental"      # identity untouched
+    assert out["domain"] == "acme.com"        # stays normalized
+    assert out["location"] == "Austin"        # enrichment still lands

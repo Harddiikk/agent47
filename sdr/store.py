@@ -140,14 +140,23 @@ class SdrStore:
                         (name, domain)).fetchone()
             if existing is not None:
                 lead_id = existing["id"]
+                # Identity fields (name, domain) are never rewritten by an
+                # upsert: the raw row may carry different casing/whitespace
+                # than the normalized lookup key, and writing it back creates
+                # near-duplicates whose later updates collide with the UNIQUE
+                # constraint. Only enrichment fields get updated.
                 updates = {f: row[f] for f in LEAD_FIELDS
-                           if row.get(f) not in (None, "", 0)}
+                           if f not in ("name", "domain")
+                           and row.get(f) not in (None, "", 0)}
                 if updates:
                     sets = ", ".join(f"{f} = ?" for f in updates)
-                    con.execute(
-                        f"UPDATE leads SET {sets}, updated_at = ? WHERE id = ?",
-                        [*updates.values(), now, lead_id],
-                    )
+                    try:
+                        con.execute(
+                            f"UPDATE leads SET {sets}, updated_at = ? WHERE id = ?",
+                            [*updates.values(), now, lead_id],
+                        )
+                    except sqlite3.IntegrityError:
+                        pass  # belt and braces: an update must never sink a scan
             con.commit()
         finally:
             if self._mem_conn is None:
