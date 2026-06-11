@@ -66,11 +66,14 @@ INTELLIGENCE_TOOLS = [
     get_signals_by_type,
 ]
 
+from shared.attachment_guard import strip_unsupported_attachments
+
 intelligence = Agent(
     name="intelligence",
     model=DEFAULT_MODEL,
     instruction=SYSTEM_PROMPT,
     tools=INTELLIGENCE_TOOLS,
+    before_model_callback=strip_unsupported_attachments,
 )
 
 root_agent = intelligence

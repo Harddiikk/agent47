@@ -7,6 +7,7 @@ from agents.account_manager import account_manager
 from agents.intelligence import intelligence
 from agents.execution import execution
 from orchestrator.tools import MANAGER_TOOLS
+from shared.attachment_guard import strip_unsupported_attachments
 from shared.config import DEFAULT_MODEL
 
 # Load system prompt from markdown
@@ -19,6 +20,7 @@ agent47 = Agent(
     instruction=SYSTEM_PROMPT,
     sub_agents=[onboarding, account_manager, intelligence, execution],
     tools=MANAGER_TOOLS,
+    before_model_callback=strip_unsupported_attachments,
 )
 
 # ADK convention: expose root agent so `adk run` and `adk web` can discover it

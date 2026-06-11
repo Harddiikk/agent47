@@ -61,11 +61,14 @@ def _build_composio_toolset():
 _composio_toolset = _build_composio_toolset()
 _tools = [_composio_toolset] if _composio_toolset is not None else []
 
+from shared.attachment_guard import strip_unsupported_attachments
+
 execution = Agent(
     name="execution",
     model=DEFAULT_MODEL,
     instruction=SYSTEM_PROMPT,
     tools=_tools,
+    before_model_callback=strip_unsupported_attachments,
 )
 
 root_agent = execution

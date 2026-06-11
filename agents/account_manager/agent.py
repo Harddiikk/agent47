@@ -7,11 +7,14 @@ from shared.config import DEFAULT_MODEL
 PROMPT_PATH = Path(__file__).parent.parent.parent / "shared" / "prompts" / "account_manager_system.md"
 SYSTEM_PROMPT = PROMPT_PATH.read_text()
 
+from shared.attachment_guard import strip_unsupported_attachments
+
 # Generic account manager (used when no specific client is named)
 account_manager = Agent(
     name="account_manager",
     model=DEFAULT_MODEL,
     instruction=SYSTEM_PROMPT,
+    before_model_callback=strip_unsupported_attachments,
 )
 
 
@@ -44,6 +47,7 @@ def make_client_agent(client_name: str, client_context: str) -> Agent:
         name=f"account_manager_{slug}",
         model=DEFAULT_MODEL,
         instruction=instruction,
+        before_model_callback=strip_unsupported_attachments,
     )
 
 
