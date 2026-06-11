@@ -57,33 +57,61 @@ def test_intelligence_has_signal_tools():
     assert intelligence.tools, "Intelligence agent should expose signal tools"
 
 
-def test_intelligence_tools_return_json_serializable():
+def _seed_ledger(tmp_path, monkeypatch):
+    """Point the tools at a temp SDR ledger with one real-style signal."""
+    from sdr.store import SdrStore
+
+    db = tmp_path / "sdr.db"
+    monkeypatch.setenv("SDR_DB_PATH", str(db))
+    store = SdrStore(db)
+    lead = store.upsert_lead({"name": "Acme Dental", "domain": "acme.com"})
+    store.add_signal(lead["id"], "expansion", "opened a second clinic in Frisco",
+                     "verified", "high", "Local SEO", 8.9)
+    return store
+
+
+def test_intelligence_tools_read_real_scan_ledger(tmp_path, monkeypatch):
     import json
 
+    _seed_ledger(tmp_path, monkeypatch)
     from agents.intelligence.agent import (
         get_all_signals,
         get_signals_by_severity,
         get_signals_by_type,
         get_signals_for_client,
     )
-    from shared.signals import reset_store
-
-    reset_store()
 
     everything = get_all_signals()
-    assert everything["signals"], "expected seed signals"
     json.dumps(everything)  # raises TypeError if not serializable
+    assert len(everything["signals"]) == 1
+    row = everything["signals"][0]
+    assert row["client"] == "Acme Dental"        # joined with the lead name
+    assert row["tier"] == "verified"
+    assert row["matched_offer"] == "Local SEO"
 
-    assert get_signals_for_client("ACME")["signals"], "case-insensitive client lookup"
+    assert get_signals_for_client("acme")["signals"], "case-insensitive name match"
     assert get_signals_by_severity("high")["signals"]
     assert get_signals_by_type("expansion")["signals"]
+    assert get_signals_by_type("risk")["signals"] == []
 
 
-def test_intelligence_tools_reject_bad_args():
+def test_intelligence_tools_reject_bad_args(tmp_path, monkeypatch):
+    _seed_ledger(tmp_path, monkeypatch)
     from agents.intelligence.agent import get_signals_by_severity, get_signals_by_type
 
     assert "error" in get_signals_by_severity("critical")
     assert "error" in get_signals_by_type("garbage")
+
+
+def test_intelligence_tools_empty_ledger_is_honest(tmp_path, monkeypatch):
+    from sdr.store import SdrStore
+
+    db = tmp_path / "empty.db"
+    monkeypatch.setenv("SDR_DB_PATH", str(db))
+    SdrStore(db)  # create schema, no signals
+    from agents.intelligence.agent import get_all_signals
+
+    assert get_all_signals()["signals"] == []
 
 
 # --- Agent 47 integration ---
