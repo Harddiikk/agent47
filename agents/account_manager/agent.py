@@ -7,17 +7,18 @@ from shared.config import DEFAULT_MODEL
 PROMPT_PATH = Path(__file__).parent.parent.parent / "shared" / "prompts" / "account_manager_system.md"
 SYSTEM_PROMPT = PROMPT_PATH.read_text()
 
-from orchestrator.tools import add_client, list_clients
+from orchestrator.tools import add_client, list_clients, scan_leads
 from shared.attachment_guard import strip_unsupported_attachments
 
 # Generic account manager (used when no specific client is named).
 # Tools-first like the SDR pipeline: briefs come from the real client store,
 # and new context the founder shares gets captured, not just acknowledged.
+# scan_leads included so a lead file dropped in THIS app never dead-ends.
 account_manager = Agent(
     name="account_manager",
     model=DEFAULT_MODEL,
     instruction=SYSTEM_PROMPT,
-    tools=[list_clients, add_client],
+    tools=[list_clients, add_client, scan_leads],
     before_model_callback=strip_unsupported_attachments,
 )
 

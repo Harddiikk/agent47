@@ -45,3 +45,18 @@ def test_research_has_attachment_guard():
     cbs = cb if isinstance(cb, list) else [cb]
     assert any(getattr(c, "__name__", "") == "strip_unsupported_attachments"
                for c in cbs)
+
+
+def test_every_app_can_scan_after_a_file_drop():
+    """User rule: behavior parity across ALL apps; a lead file dropped in any
+    app must be scannable right there, never a dead end."""
+    from agents.account_manager import account_manager
+    from agents.execution import execution
+    from agents.intelligence import intelligence
+    from agents.onboarding import onboarding
+    from agents.research import research
+    from agents.sdr_agent import sdr_agent
+
+    for app in (sdr_agent, onboarding, research, account_manager,
+                intelligence, execution):
+        assert "scan_leads" in _tool_names(app), f"{app.name} cannot scan"

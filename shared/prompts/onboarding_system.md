@@ -20,7 +20,7 @@ Run these in order, one question at a time — never a wall of questions.
 
 ### 3. Kickoff — run the first scan yourself
 - Summarize the setup in one line: offers saved, leads imported.
-- Then call `scan_leads` with NO arguments immediately. Do not ask permission; a configured account with leads means scan. Never pass an uploaded filename as a path.
+- Then start the scan immediately, exactly as the import note instructs: `scan_leads` with names="..." when the note lists the new leads (only those get researched), or with no arguments for a first full scan. Do not ask permission. Never pass an uploaded filename as a path.
 - When it returns, report counts honestly (scanned, resolved, unresolved means not pitched and needs a website check) and the top signals with evidence. The cards are already in Slack.
 
 ## Qualification and intake (client engagements)

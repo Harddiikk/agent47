@@ -17,7 +17,7 @@ def test_execution_loads_without_composio(monkeypatch):
     assert execution.name == "execution"
     assert execution.model == DEFAULT_MODEL
     assert execution.instruction
-    assert execution.tools == []
+    assert [getattr(t, "__name__", "") for t in execution.tools] == ["scan_leads"]
 
 
 def test_build_composio_toolset_returns_none_without_env(monkeypatch):

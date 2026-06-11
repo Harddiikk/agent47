@@ -98,11 +98,16 @@ INTELLIGENCE_TOOLS = [
     get_signals_by_type,
 ]
 
+# scan_leads added on top of the signal tools so a lead file dropped in this
+# app can be acted on immediately (kept out of INTELLIGENCE_TOOLS, which the
+# main agent merges with its own copy of scan_leads).
+from orchestrator.tools import scan_leads as _scan_leads
+
 intelligence = Agent(
     name="intelligence",
     model=DEFAULT_MODEL,
     instruction=SYSTEM_PROMPT,
-    tools=INTELLIGENCE_TOOLS,
+    tools=[*INTELLIGENCE_TOOLS, _scan_leads],
     before_model_callback=strip_unsupported_attachments,
 )
 

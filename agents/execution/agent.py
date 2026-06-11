@@ -61,13 +61,15 @@ def _build_composio_toolset():
 _composio_toolset = _build_composio_toolset()
 _tools = [_composio_toolset] if _composio_toolset is not None else []
 
+from orchestrator.tools import scan_leads as _scan_leads
 from shared.attachment_guard import strip_unsupported_attachments
 
+# scan_leads included so a lead file dropped in this app never dead-ends.
 execution = Agent(
     name="execution",
     model=DEFAULT_MODEL,
     instruction=SYSTEM_PROMPT,
-    tools=_tools,
+    tools=[*_tools, _scan_leads],
     before_model_callback=strip_unsupported_attachments,
 )
 
