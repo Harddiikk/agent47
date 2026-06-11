@@ -117,22 +117,29 @@ def scan_leads(csv_path: str = "data/leads.csv") -> dict:
     }
 
 
-def import_leads(csv_text: str, replace: bool = False) -> dict:
+def import_leads(csv_text: str, replace: bool = False,
+                 column_map: Optional[dict] = None) -> dict:
     """Save leads the founder pastes into the chat as CSV text, so scan_leads
     can research them. Use when the founder pastes a lead list or asks to
-    import/add leads. The text must start with a CSV header row that includes
-    'name' (other useful columns: domain, location, services, contact_name,
-    contact_email, last_service, deal_value, status). File uploads (xlsx etc.)
-    are NOT supported — ask the founder to paste rows as text instead.
+    import/add leads. Paste the founder's CSV AS-IS — headers are normalized
+    automatically (Company→name, Website→domain, First/Last name→contact_name,
+    Email→contact_email, City→location, etc.). Only if the import reports it
+    could not find usable columns, look at the founder's headers yourself and
+    retry with column_map={'their header': 'canonical field'} — canonical
+    fields: name (the BUSINESS), domain, linkedin_url, location, services,
+    contact_name, contact_email, last_service, deal_value, status. File
+    uploads (xlsx etc.) are NOT supported — ask for pasted CSV text instead.
 
     Args:
-        csv_text: CSV content, header row first.
+        csv_text: CSV content, header row first, exactly as the founder pasted.
         replace: True to replace the existing lead book instead of appending.
+        column_map: Optional explicit header mapping for unusual headers.
     """
     from sdr.ingest import save_leads_text
 
     try:
-        result = save_leads_text(csv_text, "data/leads.csv", replace=replace)
+        result = save_leads_text(csv_text, "data/leads.csv", replace=replace,
+                                 column_map=column_map)
     except ValueError as e:
         return {"ok": False, "error": str(e)}
     return {"ok": True, **result,

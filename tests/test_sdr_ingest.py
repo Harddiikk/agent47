@@ -79,3 +79,56 @@ def test_save_leads_text_rejects_garbage(tmp_path):
         save_leads_text("", tmp_path / "x.csv")
     with _pytest.raises(ValueError):
         save_leads_text("not,a,header\n1,2,3\n", tmp_path / "x.csv")
+
+
+# --- intelligent header mapping ---
+
+
+def test_save_leads_text_maps_common_crm_headers(tmp_path):
+    from sdr.ingest import save_leads_text
+    csv_text = (
+        "First name,Last name,Company,Website,Email,City\n"
+        "Raj,Patel,Smile Dental,smiledental.com,raj@smiledental.com,Austin\n"
+    )
+    out = save_leads_text(csv_text, tmp_path / "l.csv")
+    assert out["imported"] == 1
+    row = load_leads(tmp_path / "l.csv")[0]
+    assert row["name"] == "Smile Dental"            # Company → name
+    assert row["domain"] == "smiledental.com"       # Website → domain
+    assert row["contact_name"] == "Raj Patel"       # First+Last → contact_name
+    assert row["contact_email"] == "raj@smiledental.com"
+    assert row["location"] == "Austin"
+
+
+def test_save_leads_text_person_only_falls_back(tmp_path):
+    from sdr.ingest import save_leads_text
+    out = save_leads_text("First name,Last name,Email\nRaj,Patel,r@x.com\n",
+                          tmp_path / "l.csv")
+    assert out["imported"] == 1
+    assert "person name" in out["note"]
+    assert load_leads(tmp_path / "l.csv")[0]["name"] == "Raj Patel"
+
+
+def test_save_leads_text_explicit_column_map_wins(tmp_path):
+    from sdr.ingest import save_leads_text
+    out = save_leads_text(
+        "Biz,WebAddr\nAcme Clinic,acme.com\n",
+        tmp_path / "l.csv",
+        column_map={"Biz": "name", "WebAddr": "domain"})
+    row = load_leads(tmp_path / "l.csv")[0]
+    assert out["imported"] == 1
+    assert row["name"] == "Acme Clinic" and row["domain"] == "acme.com"
+
+
+def test_save_leads_text_deal_value_currency_cleaned(tmp_path):
+    from sdr.ingest import save_leads_text
+    save_leads_text("Company,Deal Value\nAcme,\"$12,500\"\n", tmp_path / "l.csv")
+    assert load_leads(tmp_path / "l.csv")[0]["deal_value"] == 12500.0
+
+
+def test_save_leads_text_unmappable_lists_headers(tmp_path):
+    import pytest as _pytest
+    from sdr.ingest import save_leads_text
+    with _pytest.raises(ValueError) as e:
+        save_leads_text("foo,bar\n1,2\n", tmp_path / "l.csv")
+    assert "foo" in str(e.value) and "column_map" in str(e.value)
