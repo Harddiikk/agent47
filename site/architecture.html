@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent 47 · SDR Agent — Architecture</title>
+<meta name="description" content="How SDR Agent turns past customers into verified, pitch-ready opportunities. Google ADK + Gemini + MCP architecture.">
+<style>
+  :root { --bg:#070d18; --panel:#0b1422; --card:#14233a; --line:#122036;
+          --text:#dde8f5; --dim:#7d93b2; --blue:#38bdf8; --green:#34d399;
+          --amber:#fbbf24; --red:#f87171; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text);
+         font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+         line-height:1.6; }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 24px; }
+  header { padding:72px 0 40px; text-align:center; }
+  .badge { display:inline-block; border:1px solid var(--line); border-radius:999px;
+           padding:6px 16px; color:var(--blue); font-size:13px; letter-spacing:2px;
+           margin-bottom:24px; }
+  h1 { font-size:clamp(32px,5vw,52px); line-height:1.15; }
+  h1 span { background:linear-gradient(90deg,var(--blue),var(--green));
+            -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sub { color:var(--dim); font-size:18px; max-width:640px; margin:18px auto 0; }
+  .cta { margin-top:28px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+  .cta a { text-decoration:none; border-radius:10px; padding:11px 22px; font-weight:600; font-size:15px; }
+  .cta .primary { background:var(--blue); color:#04121f; }
+  .cta .ghost { border:1px solid var(--line); color:var(--text); }
+  section { padding:44px 0; }
+  h2 { font-size:26px; margin-bottom:6px; }
+  .lead { color:var(--dim); margin-bottom:26px; max-width:720px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:16px;
+           padding:18px; overflow:hidden; }
+  .panel + .panel { margin-top:18px; }
+  .panel h3 { font-size:15px; letter-spacing:1px; color:var(--dim); margin:2px 6px 10px;
+              text-transform:uppercase; }
+  svg { width:100%; height:auto; display:block; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:16px; }
+  .tile { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; }
+  .tile b { display:block; font-size:16px; margin-bottom:8px; }
+  .tile p { color:var(--dim); font-size:14px; }
+  table { width:100%; border-collapse:collapse; font-size:14.5px; }
+  th,td { text-align:left; padding:12px 14px; border-bottom:1px solid var(--line); }
+  th { color:var(--dim); font-weight:600; }
+  .stack { display:flex; flex-wrap:wrap; gap:10px; }
+  .chip { border:1px solid var(--line); background:var(--card); border-radius:999px;
+          padding:7px 16px; font-size:13.5px; color:var(--text); }
+  footer { border-top:1px solid var(--line); margin-top:40px; padding:30px 0 50px;
+           color:var(--dim); font-size:14px; text-align:center; }
+  footer a { color:var(--blue); text-decoration:none; }
+  .fade { animation:fade .9s ease both; }
+  @keyframes fade { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="fade">
+  <div class="badge">AGENT 47 · GOOGLE ADK · GEMINI</div>
+  <h1>Your dead lead database,<br>turned into a <span>weekly revenue machine</span></h1>
+  <p class="sub">SDR Agent researches your past customers live on the web, verifies every claim
+  against its source, matches each signal to a service you sell, and delivers pitch-ready
+  opportunities to Slack. Autonomously, every Monday.</p>
+  <div class="cta">
+    <a class="primary" href="https://agent47.tech">Open the live agent</a>
+    <a class="ghost" href="https://github.com/Harddiikk/agent47">Source on GitHub</a>
+  </div>
+</header>
+
+<section class="fade">
+  <h2>How a scan works</h2>
+  <p class="lead">Drop an Excel file of old customers into the chat. Six stages later, verified
+  opportunities with real evidence are in Slack.</p>
+  <div class="panel"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 250" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <!-- Agent 47 / SDR Agent — animated pipeline. SMIL animations play on GitHub when embedded as an <img>. -->
+  <rect width="1080" height="250" rx="14" fill="#0b1422"/>
+  <text x="540" y="34" text-anchor="middle" fill="#38bdf8" font-size="15" font-weight="700" letter-spacing="3">SDR AGENT · HOW A SCAN WORKS</text>
+
+  <!-- connector line with flowing dashes -->
+  <line x1="100" y1="125" x2="980" y2="125" stroke="#122036" stroke-width="6"/>
+  <line x1="100" y1="125" x2="980" y2="125" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 10" opacity="0.7">
+    <animate attributeName="stroke-dashoffset" from="32" to="0" dur="0.9s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- traveling pulse -->
+  <circle r="7" fill="#38bdf8">
+    <animateMotion path="M 100 125 L 980 125" dur="7.2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.6;1" dur="1s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="13" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.5">
+    <animateMotion path="M 100 125 L 980 125" dur="7.2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- STAGE 1: leads -->
+  <g>
+    <rect x="30" y="85" width="140" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="30" y="85" width="140" height="80" rx="12" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.12;0.2" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="100" y="115" text-anchor="middle" font-size="22">📄</text>
+    <text x="100" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Your leads</text>
+    <text x="100" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">Excel / CSV / chat</text>
+  </g>
+
+  <!-- STAGE 2: identity gate -->
+  <g>
+    <rect x="210" y="85" width="150" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="210" y="85" width="150" height="80" rx="12" fill="none" stroke="#f87171" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.28;0.36" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="285" y="115" text-anchor="middle" font-size="22">🔒</text>
+    <text x="285" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Verify identity</text>
+    <text x="285" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">wrong business = never pitched</text>
+  </g>
+
+  <!-- STAGE 3: live research -->
+  <g>
+    <rect x="400" y="85" width="150" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="400" y="85" width="150" height="80" rx="12" fill="none" stroke="#34d399" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.36;0.46;0.54" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="475" y="115" text-anchor="middle" font-size="22">🌐</text>
+    <text x="475" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Live web research</text>
+    <text x="475" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">Gemini + Google Search</text>
+  </g>
+
+  <!-- STAGE 4: verified signals -->
+  <g>
+    <rect x="590" y="85" width="150" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="590" y="85" width="150" height="80" rx="12" fill="none" stroke="#34d399" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.54;0.62;0.7" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="665" y="115" text-anchor="middle" font-size="22">✅</text>
+    <text x="665" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Verified signals</text>
+    <text x="665" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">real sources, fresh only</text>
+  </g>
+
+  <!-- STAGE 5: offer match -->
+  <g>
+    <rect x="780" y="85" width="130" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="780" y="85" width="130" height="80" rx="12" fill="none" stroke="#fbbf24" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.7;0.78;0.86" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="845" y="115" text-anchor="middle" font-size="22">💰</text>
+    <text x="845" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Offer match</text>
+    <text x="845" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">your services</text>
+  </g>
+
+  <!-- STAGE 6: slack -->
+  <g>
+    <rect x="950" y="85" width="110" height="80" rx="12" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="950" y="85" width="110" height="80" rx="12" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.86;0.95;1" dur="7.2s" begin="0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="1005" y="115" text-anchor="middle" font-size="22">💬</text>
+    <text x="1005" y="138" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="600">Slack cards</text>
+    <text x="1005" y="155" text-anchor="middle" fill="#7d93b2" font-size="10">draft + send</text>
+  </g>
+
+  <!-- footer: live progress hint, blinking -->
+  <text x="540" y="215" text-anchor="middle" fill="#7d93b2" font-size="12">
+    🔍 scan #9 started · 8 leads
+    <animate attributeName="opacity" values="1;1;0;0;0;0" keyTimes="0;0.3;0.35;0.65;0.7;1" dur="7.2s" repeatCount="indefinite"/>
+  </text>
+  <text x="540" y="215" text-anchor="middle" fill="#34d399" font-size="12" opacity="0">
+    🚀 SkinSpirit — expansion signal found ✅
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.35;0.4;0.65;0.7;1" dur="7.2s" repeatCount="indefinite"/>
+  </text>
+  <text x="540" y="215" text-anchor="middle" fill="#fbbf24" font-size="12" opacity="0">
+    📊 done: 2 verified signals · cards delivered to Slack
+    <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.7;0.75;1" dur="7.2s" repeatCount="indefinite"/>
+  </text>
+</svg>
+</div>
+</section>
+
+<section class="fade">
+  <h2>The trust layer</h2>
+  <p class="lead">An SDR agent's worst failure is not missing a signal. It is confidently pitching
+  a wrong one. Three hard gates make that structurally impossible.</p>
+  <div class="panel" style="padding:6px 14px;">
+  <table>
+    <tr><th>Guarantee</th><th>Mechanism</th><th>Failure it prevents</th></tr>
+    <tr><td><b>Right business</b></td><td>Entity resolution: the lead's website must match its name
+      and location before anything else runs</td><td>Pitching based on a same-named stranger's news</td></tr>
+    <tr><td><b>Real, fresh facts</b></td><td>Every claim's source is fetched and corroborated,
+      with a 12-month recency check. Citations come from Google Search grounding metadata,
+      never from generated text</td><td>Congratulating someone on stale or hallucinated news</td></tr>
+    <tr><td><b>Never repeats</b></td><td>A change ledger plus per-lead cooldowns: rescans only
+      surface what is new</td><td>Spamming the same signal twice</td></tr>
+  </table>
+  </div>
+</section>
+
+<section class="fade">
+  <h2>The team behind one chat</h2>
+  <p class="lead">The founder talks to one agent. Behind it, focused capabilities cover the whole
+  revenue loop: setup, research, client memory, prioritization, and approval-gated action.</p>
+  <div class="panel"><h3>Onboarding · hello to ready in minutes</h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 170" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="1080" height="170" rx="14" fill="#0b1422"/>
+  <text x="540" y="30" text-anchor="middle" fill="#34d399" font-size="13" font-weight="700" letter-spacing="3">ONBOARDING · HELLO → READY IN MINUTES</text>
+
+  <line x1="110" y1="95" x2="970" y2="95" stroke="#122036" stroke-width="5"/>
+  <line x1="110" y1="95" x2="970" y2="95" stroke="#34d399" stroke-width="1.5" stroke-dasharray="6 10" opacity="0.7">
+    <animate attributeName="stroke-dashoffset" from="32" to="0" dur="0.9s" repeatCount="indefinite"/>
+  </line>
+  <circle r="6" fill="#34d399">
+    <animateMotion path="M 110 95 L 970 95" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <g>
+    <rect x="40" y="62" width="160" height="66" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="40" y="62" width="160" height="66" rx="11" fill="none" stroke="#34d399" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.04;0.16;0.26" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <text x="120" y="89" text-anchor="middle" font-size="18">👋</text>
+    <text x="120" y="110" text-anchor="middle" fill="#dde8f5" font-size="12" font-weight="600">"What do you sell?"</text>
+  </g>
+  <g>
+    <rect x="290" y="62" width="160" height="66" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="290" y="62" width="160" height="66" rx="11" fill="none" stroke="#fbbf24" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.26;0.4;0.5" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <text x="370" y="89" text-anchor="middle" font-size="18">💰</text>
+    <text x="370" y="110" text-anchor="middle" fill="#dde8f5" font-size="12" font-weight="600">Offers saved</text>
+  </g>
+  <g>
+    <rect x="540" y="62" width="160" height="66" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="540" y="62" width="160" height="66" rx="11" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.5;0.64;0.74" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <text x="620" y="89" text-anchor="middle" font-size="18">📄</text>
+    <text x="620" y="110" text-anchor="middle" fill="#dde8f5" font-size="12" font-weight="600">Drop your Excel file</text>
+  </g>
+  <g>
+    <rect x="790" y="62" width="250" height="66" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="790" y="62" width="250" height="66" rx="11" fill="none" stroke="#34d399" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.74;0.95;1" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <text x="915" y="89" text-anchor="middle" font-size="18">✅</text>
+    <text x="915" y="110" text-anchor="middle" fill="#dde8f5" font-size="12" font-weight="600">"240 leads ready — scan now?"</text>
+  </g>
+
+  <text x="540" y="152" text-anchor="middle" fill="#7d93b2" font-size="11">no setup screens · no formats to learn · one question at a time</text>
+</svg>
+</div>
+  <div class="panel"><h3>Account memory · never forgets a client</h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 170" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="1080" height="170" rx="14" fill="#0b1422"/>
+  <text x="540" y="30" text-anchor="middle" fill="#38bdf8" font-size="13" font-weight="700" letter-spacing="3">ACCOUNT MANAGER · A MEMORY THAT NEVER FORGETS A CLIENT</text>
+
+  <!-- client card whose context lines accumulate -->
+  <rect x="60" y="50" width="380" height="100" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+  <text x="80" y="74" fill="#dde8f5" font-size="13" font-weight="700">🤝 BrightSmile Dental</text>
+  <g fill="#7d93b2" font-size="11">
+    <text x="80" y="95">• launched receptionist at 2 locations
+      <animate attributeName="opacity" values="0;1;1" keyTimes="0;0.15;1" dur="6s" repeatCount="indefinite"/></text>
+    <text x="80" y="113">• Plano front desk resisting rollout
+      <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.3;0.4;1" dur="6s" repeatCount="indefinite"/></text>
+    <text x="80" y="131">• renewal conversation due in March
+      <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.55;0.65;1" dur="6s" repeatCount="indefinite"/></text>
+  </g>
+
+  <!-- arrow to answer -->
+  <line x1="470" y1="100" x2="590" y2="100" stroke="#122036" stroke-width="5"/>
+  <line x1="470" y1="100" x2="590" y2="100" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="6 10" opacity="0.7">
+    <animate attributeName="stroke-dashoffset" from="32" to="0" dur="0.9s" repeatCount="indefinite"/>
+  </line>
+  <circle r="6" fill="#38bdf8">
+    <animateMotion path="M 470 100 L 590 100" dur="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- question/answer bubble -->
+  <rect x="610" y="50" width="410" height="100" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+  <text x="630" y="76" fill="#dde8f5" font-size="12" font-weight="600">You: "What's the state with BrightSmile?"
+    <animate attributeName="opacity" values="1;1;0.35;0.35;1" keyTimes="0;0.4;0.5;0.9;1" dur="6s" repeatCount="indefinite"/></text>
+  <g>
+    <rect x="628" y="90" width="374" height="44" rx="8" fill="#0b1422" opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.5;0.6;0.95;1" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <text x="640" y="108" fill="#34d399" font-size="11" opacity="0">Live at 2 sites, COO happy. Watch: Plano adoption.
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.52;0.62;0.95;1" dur="6s" repeatCount="indefinite"/></text>
+    <text x="640" y="126" fill="#fbbf24" font-size="11" opacity="0">⏰ Renewal due March — prep the upsell case.
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.6;0.7;0.95;1" dur="6s" repeatCount="indefinite"/></text>
+  </g>
+
+  <text x="540" y="164" text-anchor="middle" fill="#7d93b2" font-size="11">dump notes after every call — get instant briefs before the next one</text>
+</svg>
+</div>
+  <div class="panel"><h3>Intelligence · ranks what matters each week</h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 170" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="1080" height="170" rx="14" fill="#0b1422"/>
+  <text x="540" y="30" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="700" letter-spacing="3">INTELLIGENCE · WATCHES THE WHOLE BOOK, RANKS WHAT MATTERS</text>
+
+  <!-- radar: signals appearing -->
+  <g>
+    <circle cx="160" cy="100" r="44" fill="none" stroke="#122036" stroke-width="2"/>
+    <circle cx="160" cy="100" r="28" fill="none" stroke="#122036" stroke-width="2"/>
+    <circle cx="160" cy="100" r="44" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.6">
+      <animate attributeName="r" values="6;44" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="160" y="106" text-anchor="middle" font-size="18">📡</text>
+  </g>
+
+  <!-- incoming signal dots flying to columns -->
+  <circle r="5" fill="#34d399">
+    <animateMotion path="M 210 86 L 420 76" dur="2s" begin="0s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.9;1" dur="2s" begin="0s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="#f87171">
+    <animateMotion path="M 210 100 L 420 104" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.9;1" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="#fbbf24">
+    <animateMotion path="M 210 114 L 420 132" dur="2s" begin="1.3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.9;1" dur="2s" begin="1.3s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- classified columns -->
+  <g font-size="11" fill="#dde8f5">
+    <rect x="430" y="60" width="200" height="28" rx="7" fill="#14233a"/>
+    <text x="445" y="78">🟢 expansion — upsell moment</text>
+    <rect x="430" y="92" width="200" height="28" rx="7" fill="#14233a"/>
+    <text x="445" y="110">🔴 risk — silent client</text>
+    <rect x="430" y="124" width="200" height="28" rx="7" fill="#14233a"/>
+    <text x="445" y="142">🟠 health — usage trending up</text>
+  </g>
+
+  <!-- arrow to brief -->
+  <line x1="650" y1="100" x2="740" y2="100" stroke="#122036" stroke-width="5"/>
+  <circle r="6" fill="#fbbf24">
+    <animateMotion path="M 650 100 L 740 100" dur="1.6s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- weekly brief -->
+  <rect x="750" y="52" width="280" height="96" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+  <rect x="750" y="52" width="280" height="96" rx="11" fill="none" stroke="#fbbf24" stroke-width="2.5" opacity="0">
+    <animate attributeName="opacity" values="0;1;0" dur="3.2s" repeatCount="indefinite"/>
+  </rect>
+  <text x="890" y="76" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="700">📊 Weekly Brief</text>
+  <text x="890" y="98" text-anchor="middle" fill="#7d93b2" font-size="11">Top of inbox: 3 items need you</text>
+  <text x="890" y="116" text-anchor="middle" fill="#7d93b2" font-size="11">ranked by severity · every client</text>
+  <text x="890" y="134" text-anchor="middle" fill="#7d93b2" font-size="11">evidence behind every line</text>
+
+  <text x="540" y="164" text-anchor="middle" fill="#7d93b2" font-size="11">spot the upsell before they ask — catch the churn before it happens</text>
+</svg>
+</div>
+  <div class="panel"><h3>Execution · acts only with your yes</h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 170" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="1080" height="170" rx="14" fill="#0b1422"/>
+  <text x="540" y="30" text-anchor="middle" fill="#f87171" font-size="13" font-weight="700" letter-spacing="3">EXECUTION · ACTS IN THE REAL WORLD — ONLY WITH YOUR YES</text>
+
+  <line x1="120" y1="95" x2="960" y2="95" stroke="#122036" stroke-width="5"/>
+
+  <!-- draft -->
+  <g>
+    <rect x="50" y="62" width="190" height="66" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <text x="145" y="89" text-anchor="middle" font-size="18">✉️</text>
+    <text x="145" y="110" text-anchor="middle" fill="#dde8f5" font-size="12" font-weight="600">Draft prepared</text>
+  </g>
+
+  <!-- pulse stops at the gate -->
+  <circle r="6" fill="#f87171">
+    <animateMotion path="M 250 95 L 455 95" dur="6s" keyPoints="0;1;1" keyTimes="0;0.3;1" calcMode="linear" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.45;0.5;1" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- approval gate -->
+  <g>
+    <rect x="465" y="52" width="190" height="86" rx="11" fill="#14233a" stroke="#f87171" stroke-width="2"/>
+    <text x="560" y="82" text-anchor="middle" font-size="18">🚧</text>
+    <text x="560" y="103" text-anchor="middle" fill="#dde8f5" font-size="12" font-weight="600">Your approval</text>
+    <text x="560" y="121" text-anchor="middle" fill="#7d93b2" font-size="10">"approve, edit, or cancel?"</text>
+    <!-- the gate turns green when approved -->
+    <rect x="465" y="52" width="190" height="86" rx="11" fill="none" stroke="#34d399" stroke-width="3" opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.45;0.55;0.9;1" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <text x="560" y="47" text-anchor="middle" font-size="15" opacity="0">👍
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.45;0.55;0.9;1" dur="6s" repeatCount="indefinite"/></text>
+  </g>
+
+  <!-- after approval the pulse continues green -->
+  <circle r="6" fill="#34d399" opacity="0">
+    <animateMotion path="M 655 95 L 880 95" dur="6s" keyPoints="0;0;1" keyTimes="0;0.55;0.75" calcMode="linear" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.55;0.6;0.75;0.8" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- send targets -->
+  <g>
+    <rect x="890" y="52" width="150" height="86" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+    <rect x="890" y="52" width="150" height="86" rx="11" fill="none" stroke="#34d399" stroke-width="2.5" opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.72;0.78;0.95;1" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <text x="965" y="80" text-anchor="middle" font-size="15">📧 📅 💬</text>
+    <text x="965" y="103" text-anchor="middle" fill="#dde8f5" font-size="12" font-weight="600">Sent + logged</text>
+    <text x="965" y="121" text-anchor="middle" fill="#7d93b2" font-size="10">Gmail · Calendar · Slack</text>
+  </g>
+
+  <text x="540" y="160" text-anchor="middle" fill="#7d93b2" font-size="11">500+ apps via Composio MCP · nothing ever sends without explicit approval · full audit trail</text>
+</svg>
+</div>
+</section>
+
+<section class="fade">
+  <h2>Built simple on purpose</h2>
+  <div class="grid">
+    <div class="tile"><b>📄 Files just work</b><p>Drop the Excel your CRM exports, or a services
+      PDF. Headers and offers are understood automatically. Nothing to format, nothing to learn.</p></div>
+    <div class="tile"><b>📡 Watch it work</b><p>Scans stream live progress into Slack while they
+      run, and finish with ranked cards: severity, confidence, source link, matched offer, draft.</p></div>
+    <div class="tile"><b>🤖 Autonomous Mondays</b><p>A scheduled scan runs weekly on the server.
+      New verified opportunities appear in Slack with nobody in the chat.</p></div>
+    <div class="tile"><b>🔒 Human in the loop</b><p>Outreach is drafted, never sent. Real-world
+      actions (Gmail, Calendar, Slack via Composio MCP) need explicit approval, with an audit trail.</p></div>
+  </div>
+</section>
+
+<section class="fade">
+  <h2>Stack</h2>
+  <div class="stack">
+    <span class="chip">Google ADK 2.0</span><span class="chip">Gemini 3.5 Flash</span>
+    <span class="chip">Google Search grounding</span><span class="chip">MCP · Composio Tool Router</span>
+    <span class="chip">SQLite change ledger</span><span class="chip">Slack Block Kit</span>
+    <span class="chip">Docker + Caddy · auto-TLS</span><span class="chip">190+ offline tests</span>
+  </div>
+</section>
+
+<footer>
+  Built for the Google for Startups AI Agents Challenge ·
+  <a href="https://agent47.tech">agent47.tech</a> ·
+  <a href="https://github.com/Harddiikk/agent47">github.com/Harddiikk/agent47</a>
+</footer>
+
+</div>
+</body>
+</html>
