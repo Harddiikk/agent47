@@ -142,11 +142,13 @@ def save_leads_text(csv_text: str, path: str | Path, *, replace: bool = False,
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
     existing: list[dict] = []
+    parsed_count = len(rows)
     if p.exists() and not replace:
         existing = load_leads(p)
         seen = {(r["name"].lower(), r["domain"].lower()) for r in existing}
         rows = [r for r in rows
                 if (r["name"].lower(), r.get("domain", "").lower()) not in seen]
+    duplicates_skipped = parsed_count - len(rows)
 
     with p.open("w", newline="", encoding="utf-8") as f:
         writer = _csv.DictWriter(f, fieldnames=list(LEAD_FIELDS))
@@ -154,6 +156,7 @@ def save_leads_text(csv_text: str, path: str | Path, *, replace: bool = False,
         for r in existing + rows:
             writer.writerow({f: r.get(f, "") for f in LEAD_FIELDS})
     return {"imported": len(rows), "total_in_file": len(existing) + len(rows),
+            "duplicates_skipped": duplicates_skipped,
             "path": str(p), "replaced": replace,
             "note": ("no business-name column found; used the contact's person "
                      "name as the lead name" if used_person_as_name else "")}

@@ -98,6 +98,7 @@ def try_import_blob(data: bytes, mime_type: str, filename: str = "") -> Optional
 
     summary = {"ok": True, "filename": filename, "imported": result["imported"],
                "total_in_file": result["total_in_file"],
+               "duplicates_skipped": result.get("duplicates_skipped", 0),
                "note": result.get("note", "")}
     _remember(digest, summary)
     return summary

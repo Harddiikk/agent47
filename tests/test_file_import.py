@@ -67,3 +67,27 @@ def test_try_import_blob_garbage_reports_error(tmp_path, monkeypatch):
     out = try_import_blob(b"not a real file at all", XLSX_MIME, "bad.xlsx")
     assert out["ok"] is False
     assert out["error"]
+
+
+def test_reupload_same_rows_different_file_reports_not_failure(tmp_path, monkeypatch):
+    """Regression: a CSV re-upload of already-imported leads reported
+    '0 leads imported' and the model treated it as a format failure."""
+    monkeypatch.chdir(tmp_path)
+    xlsx = _xlsx_bytes(CRM_ROWS)
+    first = try_import_blob(xlsx, XLSX_MIME, "leads.xlsx")
+    assert first["imported"] == 2
+    # same rows, different bytes/format -> different hash, not 'already_imported'
+    csv_bytes = ("First name,Last name,Company,Website,Email,City\n"
+                 "Raj,Patel,Smile Dental,smiledental.com,raj@smile.com,Austin\n"
+                 "Mia,Lopez,GlowSpa,glowspa.com,mia@glowspa.com,Miami\n").encode()
+    again = try_import_blob(csv_bytes, "text/csv", "leads.csv")
+    assert again["ok"] is True
+    assert again["imported"] == 0
+    assert again["total_in_file"] == 2
+    assert again["duplicates_skipped"] == 2
+
+    from shared.attachment_guard import _import_note
+    note = _import_note("leads.csv", again)
+    assert "NOT a failure" in note
+    assert "scan_leads" in note
+    assert "re-paste" in note or "re-upload" in note

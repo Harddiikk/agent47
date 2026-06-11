@@ -41,7 +41,7 @@ def test_xlsx_blob_is_imported_as_leads(tmp_path, monkeypatch):
     parts = req.contents[0].parts
     assert parts[1].inline_data is None              # blob gone
     assert "leads.xlsx" in parts[1].text
-    assert "1 leads imported" in parts[1].text       # actually imported
+    assert "1 new leads imported" in parts[1].text       # actually imported
     assert parts[0].text == "here is my customer file"  # untouched
     from sdr.ingest import load_leads
     assert load_leads("data/leads.csv")[0]["name"] == "Acme Dental"

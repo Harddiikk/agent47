@@ -81,12 +81,23 @@ def _import_note(name: str, result) -> str:
     if not result:
         return f"[The founder attached '{name}' but it contained no data.]"
     if result.get("already_imported"):
-        return (f"[Spreadsheet '{name}' was already imported earlier "
-                f"({result.get('imported', 0)} leads). Do not re-import.]")
+        return (f"[Spreadsheet '{name}' was already imported earlier; its leads "
+                f"are in the lead book. This is NOT a failure. Do not re-import "
+                f"and do not ask the founder to re-send anything; proceed to "
+                f"scan_leads with NO arguments.]")
     if result.get("ok"):
         note = f" Note: {result['note']}." if result.get("note") else ""
-        return (f"[Spreadsheet '{name}' received: {result['imported']} leads "
-                f"imported into the lead book ({result['total_in_file']} total)."
+        if result.get("imported", 0) == 0 and result.get("total_in_file", 0) > 0:
+            return (f"[Spreadsheet '{name}' received. This is NOT a failure: "
+                    f"every lead in it is ALREADY in the lead book "
+                    f"({result.get('duplicates_skipped', 0)} duplicates skipped, "
+                    f"{result['total_in_file']} leads on file). Do NOT ask the "
+                    f"founder to re-paste or re-upload anything. Say the leads "
+                    f"are already loaded, then START THE SCAN IMMEDIATELY by "
+                    f"calling scan_leads with NO arguments.]")
+        return (f"[Spreadsheet '{name}' received: {result['imported']} new leads "
+                f"imported into the lead book ({result['total_in_file']} total, "
+                f"{result.get('duplicates_skipped', 0)} duplicates skipped)."
                 f"{note} Tell the founder the counts in one line, then START THE "
                 f"SCAN IMMEDIATELY by calling scan_leads with NO arguments (the "
                 f"file is already merged into the lead book; never pass the "
