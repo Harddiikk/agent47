@@ -45,6 +45,22 @@ flowchart TD
 
 One root agent the founder talks to; four specialists it delegates to; a set of manager tools that run the two research pipelines.
 
+### Meet the specialists
+
+One root agent talks to you; four specialists do the work. Each one, in motion:
+
+**📋 Onboarding — hello → ready in minutes**
+<p align="center"><img src="assets/onboarding-animated.svg" alt="Onboarding: what do you sell → offers saved → drop your Excel file → leads ready" width="100%"/></p>
+
+**🤝 Account Manager — a memory that never forgets a client**
+<p align="center"><img src="assets/account-manager-animated.svg" alt="Account Manager: notes accumulate on the client record, instant briefs on demand" width="100%"/></p>
+
+**🧠 Intelligence — watches the whole book, ranks what matters**
+<p align="center"><img src="assets/intelligence-animated.svg" alt="Intelligence: signals classified into expansion, risk, health — weekly ranked brief" width="100%"/></p>
+
+**⚡ Execution — acts in the real world, only with your yes**
+<p align="center"><img src="assets/execution-animated.svg" alt="Execution: draft → approval gate → sent via Gmail, Calendar, Slack with audit trail" width="100%"/></p>
+
 ### Pipeline 1 — `scan_my_book` (past customers → outreach)
 
 ```mermaid

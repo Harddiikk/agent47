@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 170" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="1080" height="170" rx="14" fill="#0b1422"/>
+  <text x="540" y="30" text-anchor="middle" fill="#38bdf8" font-size="13" font-weight="700" letter-spacing="3">ACCOUNT MANAGER · A MEMORY THAT NEVER FORGETS A CLIENT</text>
+
+  <!-- client card whose context lines accumulate -->
+  <rect x="60" y="50" width="380" height="100" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+  <text x="80" y="74" fill="#dde8f5" font-size="13" font-weight="700">🤝 BrightSmile Dental</text>
+  <g fill="#7d93b2" font-size="11">
+    <text x="80" y="95">• launched receptionist at 2 locations
+      <animate attributeName="opacity" values="0;1;1" keyTimes="0;0.15;1" dur="6s" repeatCount="indefinite"/></text>
+    <text x="80" y="113">• Plano front desk resisting rollout
+      <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.3;0.4;1" dur="6s" repeatCount="indefinite"/></text>
+    <text x="80" y="131">• renewal conversation due in March
+      <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.55;0.65;1" dur="6s" repeatCount="indefinite"/></text>
+  </g>
+
+  <!-- arrow to answer -->
+  <line x1="470" y1="100" x2="590" y2="100" stroke="#122036" stroke-width="5"/>
+  <line x1="470" y1="100" x2="590" y2="100" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="6 10" opacity="0.7">
+    <animate attributeName="stroke-dashoffset" from="32" to="0" dur="0.9s" repeatCount="indefinite"/>
+  </line>
+  <circle r="6" fill="#38bdf8">
+    <animateMotion path="M 470 100 L 590 100" dur="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- question/answer bubble -->
+  <rect x="610" y="50" width="410" height="100" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+  <text x="630" y="76" fill="#dde8f5" font-size="12" font-weight="600">You: "What's the state with BrightSmile?"
+    <animate attributeName="opacity" values="1;1;0.35;0.35;1" keyTimes="0;0.4;0.5;0.9;1" dur="6s" repeatCount="indefinite"/></text>
+  <g>
+    <rect x="628" y="90" width="374" height="44" rx="8" fill="#0b1422" opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.5;0.6;0.95;1" dur="6s" repeatCount="indefinite"/>
+    </rect>
+    <text x="640" y="108" fill="#34d399" font-size="11" opacity="0">Live at 2 sites, COO happy. Watch: Plano adoption.
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.52;0.62;0.95;1" dur="6s" repeatCount="indefinite"/></text>
+    <text x="640" y="126" fill="#fbbf24" font-size="11" opacity="0">⏰ Renewal due March — prep the upsell case.
+      <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.6;0.7;0.95;1" dur="6s" repeatCount="indefinite"/></text>
+  </g>
+
+  <text x="540" y="164" text-anchor="middle" fill="#7d93b2" font-size="11">dump notes after every call — get instant briefs before the next one</text>
+</svg>

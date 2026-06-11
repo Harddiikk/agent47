@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 170" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="1080" height="170" rx="14" fill="#0b1422"/>
+  <text x="540" y="30" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="700" letter-spacing="3">INTELLIGENCE · WATCHES THE WHOLE BOOK, RANKS WHAT MATTERS</text>
+
+  <!-- radar: signals appearing -->
+  <g>
+    <circle cx="160" cy="100" r="44" fill="none" stroke="#122036" stroke-width="2"/>
+    <circle cx="160" cy="100" r="28" fill="none" stroke="#122036" stroke-width="2"/>
+    <circle cx="160" cy="100" r="44" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.6">
+      <animate attributeName="r" values="6;44" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="160" y="106" text-anchor="middle" font-size="18">📡</text>
+  </g>
+
+  <!-- incoming signal dots flying to columns -->
+  <circle r="5" fill="#34d399">
+    <animateMotion path="M 210 86 L 420 76" dur="2s" begin="0s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.9;1" dur="2s" begin="0s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="#f87171">
+    <animateMotion path="M 210 100 L 420 104" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.9;1" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="#fbbf24">
+    <animateMotion path="M 210 114 L 420 132" dur="2s" begin="1.3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.9;1" dur="2s" begin="1.3s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- classified columns -->
+  <g font-size="11" fill="#dde8f5">
+    <rect x="430" y="60" width="200" height="28" rx="7" fill="#14233a"/>
+    <text x="445" y="78">🟢 expansion — upsell moment</text>
+    <rect x="430" y="92" width="200" height="28" rx="7" fill="#14233a"/>
+    <text x="445" y="110">🔴 risk — silent client</text>
+    <rect x="430" y="124" width="200" height="28" rx="7" fill="#14233a"/>
+    <text x="445" y="142">🟠 health — usage trending up</text>
+  </g>
+
+  <!-- arrow to brief -->
+  <line x1="650" y1="100" x2="740" y2="100" stroke="#122036" stroke-width="5"/>
+  <circle r="6" fill="#fbbf24">
+    <animateMotion path="M 650 100 L 740 100" dur="1.6s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- weekly brief -->
+  <rect x="750" y="52" width="280" height="96" rx="11" fill="#14233a" stroke="#122036" stroke-width="2"/>
+  <rect x="750" y="52" width="280" height="96" rx="11" fill="none" stroke="#fbbf24" stroke-width="2.5" opacity="0">
+    <animate attributeName="opacity" values="0;1;0" dur="3.2s" repeatCount="indefinite"/>
+  </rect>
+  <text x="890" y="76" text-anchor="middle" fill="#dde8f5" font-size="13" font-weight="700">📊 Weekly Brief</text>
+  <text x="890" y="98" text-anchor="middle" fill="#7d93b2" font-size="11">Top of inbox: 3 items need you</text>
+  <text x="890" y="116" text-anchor="middle" fill="#7d93b2" font-size="11">ranked by severity · every client</text>
+  <text x="890" y="134" text-anchor="middle" fill="#7d93b2" font-size="11">evidence behind every line</text>
+
+  <text x="540" y="164" text-anchor="middle" fill="#7d93b2" font-size="11">spot the upsell before they ask — catch the churn before it happens</text>
+</svg>

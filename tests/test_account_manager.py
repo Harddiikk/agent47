@@ -60,3 +60,10 @@ def test_part1_and_part2_unbroken():
     assert onboarding.name == "onboarding"
     names = [a.name for a in agent47.sub_agents]
     assert "onboarding" in names
+
+
+def test_account_manager_has_client_tools():
+    from agents.account_manager import account_manager
+
+    names = {getattr(t, "__name__", "") for t in account_manager.tools}
+    assert {"list_clients", "add_client"} <= names
